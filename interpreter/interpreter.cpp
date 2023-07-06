@@ -7,28 +7,10 @@
 using namespace std;
 
 int main() {
-    string input = "(defun function_name(p1 p2 p3 p4)(+ p1 p2 p3 p4))";
-    /*Scanner scanner;
-    scanner.scan(input);
-    scanner.root().print();*/
-    LInterpreter lInterpreter;
+    //string input = "(print (quote (a b c)) (quote (1 2 3)))";
+    //string input = "(setvar x (quote a)) (print x)";
+    string input = "(setvar c (quote x)) (defun f(a b) (+ (a b c)) (+ (a b c c))) (print (f x y))";
+    LInterpreter& lInterpreter = LInterpreter::getInstance();
     lInterpreter.execute(input);
-    /*Parser parse;
-    vector<Token> tokens = parse.parseToken(input);
-    for (auto token : tokens) {
-        switch (token.m_type) {
-            case LEFT_BRACKET:
-                cout << '(' << endl;
-                break;
-            case RIGHT_BRACKET:
-                cout << ')' << endl;
-                break;
-            case END:
-                return 0;
-            default:
-                cout << token.m_atom << endl;
-                break;
-        }
-    }*/
     return 0;
 }

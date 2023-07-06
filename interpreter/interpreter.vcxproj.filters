@@ -32,5 +32,8 @@
     <ClInclude Include="LInterpreter.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

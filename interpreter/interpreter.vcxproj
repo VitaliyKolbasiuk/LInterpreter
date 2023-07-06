@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LInterpreter.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="Scanner.h" />
   </ItemGroup>
