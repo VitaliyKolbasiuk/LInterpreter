@@ -1,7 +1,9 @@
 #pragma once
+
+#include "Parser.h"
+
 #include <iostream>
 #include <list>
-#include "Parser.h"
 
 struct SExpression {
     enum Type {

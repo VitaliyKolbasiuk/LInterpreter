@@ -51,4 +51,22 @@ LInterpreter::LInterpreter() {
 		return SExpression{};
 	};
 
+	m_builtInFuncMap["+"] = [](const std::list<SExpression>& exprList) -> SExpression {
+		auto it = exprList.cbegin();
+		it++;
+		SExpression result = LInterpreter::getInstance().execute(*it);
+		result.m_numberValue = 0;
+		result.m_stringValue = "";
+		while (it != exprList.cend()) {
+			SExpression temp = LInterpreter::getInstance().execute(*it);
+			if (temp.m_type == SExpression::NUMBER) {
+				result.m_numberValue += temp.m_numberValue;
+			}
+			else {
+				result.m_stringValue += temp.m_stringValue;
+			}
+			it++;
+		}
+		return result;
+	};
 }
