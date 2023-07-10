@@ -1,79 +1,70 @@
 #pragma once
 
-#include "Parser.h"
-
 #include <iostream>
-#include <list>
 
-struct SExpression {
-    enum Type {
-        ATOM,
-        NUMBER,
-        LIST
-    };
-    Type m_type = LIST;
-    int  m_numberValue;
-    std::string             m_stringValue;
-    std::list <SExpression> m_list;
-
-    SExpression(const std::string& atomString) : m_type(ATOM), m_stringValue(atomString){
-        char* ptrEnd;
-        m_numberValue = strtol(m_stringValue.c_str(), &ptrEnd, 10);
-        if (*ptrEnd == char(0)) {
-            m_type = NUMBER;
-        }
-    }
-    SExpression(): m_type(LIST){}
-    void print() const{
-        switch (m_type) {
-        case LIST:
-            std::cout << "( ";
-            for (const auto &item : m_list)
-                item.print();
-            std::cout << " )";
-            break;
-        case ATOM:
-            std::cout << m_stringValue << ' ';
-            break;
-        case NUMBER:
-            std::cout << m_numberValue << ' ';
-            break;
-        }
-    }
-};
-
-class Scanner {
-    Parser m_parser;
-    std::string m_expression;
-    SExpression m_root;
+class ParserX {
+    int pos = 0;
 public:
-    const SExpression& root() const { return m_root; }
-    void scan(const std::string& expression) {
-        m_expression = expression;
-        scan(m_root);
-    }
-    void scan(SExpression& parent) {
-        for (;;) {
-            auto token = m_parser.parseToken(m_expression);
-            std::cerr << token.m_atom << std::endl;
-            switch (token.m_type) {
-            case Parser::LEFT_BRACKET: {
-                SExpression sExpression;
-                scan(sExpression);
-                parent.m_list.push_back(sExpression);
-                break;
-            }
-            case Parser::RIGHT_BRACKET:
-                return;
-            case Parser::ATOM:
-                parent.m_list.push_back(token.m_atom);
-                break;
-            case Parser::END:
-                return;
+    enum TokenType {
+        LEFT_BRACKET,
+        RIGHT_BRACKET,
+        ATOM,
+        END
+    };
+
+    struct Token {
+
+        Token(TokenType type) : m_type(type) {}
+        TokenType m_type;
+        std::string    m_atom;
+    };
+
+
+    Token parseToken(const std::string& expression) {
+        int len = expression.length();
+        while (pos < len) {
+            char c = expression[pos];
+            switch (c) {
+            case '(':
+                pos++;
+                return Token(LEFT_BRACKET);
+            case ')':
+                pos++;
+                return Token(RIGHT_BRACKET);
+            case ' ':
+                pos++;
+                break; // nothing
+            default:
+                Token atom(ATOM);
+                while (pos < len && expression[pos] != '(' && expression[pos] != ')' && expression[pos] != ' ') {
+                    atom.m_atom.push_back(expression[pos]);
+                    pos++;
+                }
+                return atom;
             }
         }
-    }
+        return Token(END);
 
+    }
 };
+
+inline std::ostream& operator<<(std::ostream& os, ParserX::Token const& token) {
+    switch (token.m_type) {
+    case ParserX::LEFT_BRACKET: {
+        os << "LEFT_BRACKET";
+        break;
+    }
+    case ParserX::RIGHT_BRACKET:
+        os << "RIGHT_BRACKET";
+        break;
+    case ParserX::ATOM:
+        os << token.m_atom;
+        break;
+    case ParserX::END:
+        os << "END";
+        break;
+    }
+    return os;
+}
 
     

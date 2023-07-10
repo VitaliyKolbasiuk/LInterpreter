@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scanner.h"
+#include "Parser.h"
 #include "Log.h"
 
 #include <iostream>
@@ -8,17 +8,18 @@
 #include <functional>
 #include <stack>
 
-using BuiltInFunc = std::function <const SExpression(const std::list<SExpression>&)>;
+using BuiltInFunc = std::function< SExpr* (SExpr*) >;
 
 class LInterpreter {
-	Scanner m_scanner;
+    Parser m_parser;
 	LInterpreter();
+
 public: 
 	std::map<std::string, BuiltInFunc> m_builtInFuncMap;
-	std::map<std::string, SExpression> m_userFuncMap;
-	std::map<std::string, SExpression> m_variableMap;
+    std::map<std::string, SExpr*> m_userFuncMap;
+    std::map<std::string, SExpr*> m_variableMap;
 
-	using LocalVariableMap = std::map<std::string, SExpression>;
+    using LocalVariableMap = std::map<std::string, SExpr*>;
 	std::stack<LocalVariableMap> m_stack;
 
 	static LInterpreter& getInstance() {
@@ -27,20 +28,19 @@ public:
 	}
 
 	void execute(const std::string& lText) {
-		m_scanner.scan(lText);
-		const auto& root = m_scanner.root();
-		root.print();
-		for ( auto& it: root.m_list) {
+        m_parser.parse(lText);
+        const auto* root = m_parser.root();
+        root->print();
+        for( auto* it = root->m_next; it != nullptr; it = it->m_next ) {
 			execute(it);
 		}
 	}
 
-	SExpression execute(const SExpression& sExpr) {
-		switch (sExpr.m_type) {
-		case SExpression::NUMBER:
-		case SExpression::ATOM:
+    SExpr* execute(SExpr* sExpr) {
+        switch (sExpr->m_type) {
+        case SExpr::ATOM:
 			LOG("ATOM");
-			if (auto it = m_variableMap.find(sExpr.m_stringValue);
+            if (auto it = m_variableMap.find(sExpr->m_stringValue);
 				it != m_variableMap.end())
 			{
 				return it->second;
@@ -48,25 +48,35 @@ public:
 			else {
 				return sExpr;
 			}
-		case SExpression::LIST:
+        case SExpr::LIST:
 			LOG("LIST");
-			if (sExpr.m_list.size() == 0) {
+            if (sExpr->isNil() ) {
 				LOG("NULL");
-				return SExpression{};
+                return sExpr;
 			}
 			else {
-				const auto& funcName = sExpr.m_list.front();
-				LOGVAR(funcName.m_stringValue);
-				if (funcName.m_type == SExpression::ATOM) {
-					if ( auto it =  m_builtInFuncMap.find(funcName.m_stringValue);
-						      it != m_builtInFuncMap.end() ) 
-					{
-						return it->second(sExpr.m_list);
-					}
-				}
+                auto* funcName = sExpr->m_next;
+                if ( funcName->m_type == SExpr::ATOM )
+                {
+                    LOGVAR(funcName->m_stringValue);
+
+                    if ( auto it =  m_builtInFuncMap.find(funcName->m_stringValue);
+                              it != m_builtInFuncMap.end() )
+                    {
+                        return it->second( sExpr->m_next->m_next );
+                    }
+                    else
+                    {
+                        // user function map
+                    }
+                }
+                else
+                {
+                    LOG("must be a function name!");
+                }
 			}
 			break;
 		}
-		return SExpression{};
+        return new SExpr{};
 	}
 };

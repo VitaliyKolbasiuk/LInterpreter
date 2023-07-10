@@ -1,68 +1,157 @@
 #pragma once
 
+#include "Scanner.h"
+
 #include <iostream>
+#include <list>
 
-class Parser {
-    int pos = 0;
-public:
-    enum TokenType {
-        LEFT_BRACKET,
-        RIGHT_BRACKET,
-        ATOM,
-        END
+struct SExpr {
+    enum Type {
+        LIST=0,
+        ATOM
     };
 
-    struct Token {
+    SExpr() : m_type(LIST), m_next(nullptr) {} // '()'
 
-        Token(TokenType type) : m_type(type) {}
-        TokenType m_type;
-        std::string    m_atom;
-    };
+    SExpr( const char* atomName ) : m_type(ATOM) {
+        m_stringValue = new char[ std::strlen(atomName)+1 ];
+        std::strcpy( (char*)m_stringValue, atomName );
+    }
 
-
-    Token parseToken(const std::string& expression) {
-        int len = expression.length();
-        while (pos < len) {
-            char c = expression[pos];
-            switch (c) {
-            case '(':
-                pos++;
-                return Token(LEFT_BRACKET);
-            case ')':
-                pos++;
-                return Token(RIGHT_BRACKET);
-            case ' ':
-                pos++;
-                break; // nothing
-            default:
-                Token atom(ATOM);
-                while (pos < len && expression[pos] != '(' && expression[pos] != ')' && expression[pos] != ' ') {
-                    atom.m_atom.push_back(expression[pos]);
-                    pos++;
-                }
-                return atom;
+    ~SExpr() {
+        if ( m_type == ATOM ) {
+            if ( m_stringValue == nullptr )
+            {
+                delete [] m_stringValue;
             }
         }
-        return Token(END);
+    }
 
+    Type m_type = LIST;
+
+    union
+    {
+        const char* m_stringValue;
+        SExpr*      m_next;
+    };
+
+    bool isNil() const { return m_type==LIST && m_next==nullptr; }
+
+    void push_back( SExpr* sExpr)
+    {
+        if ( m_next == nullptr)
+        {
+            m_next = sExpr;
+        }
+        else
+        {
+            auto* it = m_next;
+            while( it->m_next != nullptr )
+                it++;
+            it->m_next = sExpr;
+        }
+
+//        SExpr** it = &m_next;
+//        while( (*it) != nullptr )
+//            it = &( (*it)->m_next );
+
+//        (*it) = sExpr;
+    }
+
+    void print() const {
+        switch (m_type) {
+        case LIST:
+            if ( m_next == nullptr )
+            {
+                std::cout << "NIL" << std::flush;
+            }
+
+            std::cout << "( " << std::flush;
+            for( const auto* it = m_next; it != nullptr; it = it->m_next ) {
+                it->print();
+            }
+            std::cout << " )" << std::flush;
+            break;
+        case ATOM:
+            std::cout << m_stringValue << ' ' << std::flush;
+            break;
+        }
     }
 };
 
-inline std::ostream& operator<<(std::ostream& os, Parser::Token const& token) {
-    switch (token.m_type) {
-    case Parser::LEFT_BRACKET: {
-        os << "LEFT_BRACKET";
-        break;
+
+//struct SExpression {
+//    enum Type {
+//        ATOM,
+//        NUMBER,
+//        LIST
+//    };
+//    Type m_type = LIST;
+//    int  m_numberValue;
+//    std::string             m_stringValue;
+//    std::list <SExpression> m_list;
+
+//    SExpression(const std::string& atomString) : m_type(ATOM), m_stringValue(atomString){
+//        char* ptrEnd;
+//        m_numberValue = strtol(m_stringValue.c_str(), &ptrEnd, 10);
+//        if (*ptrEnd == char(0)) {
+//            m_type = NUMBER;
+//        }
+//    }
+//    SExpression(): m_type(LIST){}
+//    void print() const{
+//        switch (m_type) {
+//        case LIST:
+//            std::cout << "( ";
+//            for (const auto &item : m_list)
+//                item.print();
+//            std::cout << " )";
+//            break;
+//        case ATOM:
+//            std::cout << m_stringValue << ' ';
+//            break;
+//        case NUMBER:
+//            std::cout << m_numberValue << ' ';
+//            break;
+//        }
+//    }
+//};
+
+class Parser {
+    ParserX m_parser;
+    std::string m_expression;
+    SExpr m_root;
+public:
+    const SExpr* root() const { return &m_root; }
+    void parse(const std::string& expression) {
+        m_expression = expression;
+        parse(&m_root);
     }
-    case Parser::RIGHT_BRACKET:
-        os << "RIGHT_BRACKET";
-        break;
-    case Parser::ATOM:
-        os << token.m_atom;
-        break;
-    case Parser::END:
-        os << "END";
-        break;
+    void parse(SExpr* parent) {
+        SExpr* back = parent;
+        for (;;) {
+            auto token = m_parser.parseToken(m_expression);
+            std::cerr << token.m_atom << std::endl;
+
+            switch (token.m_type) {
+            case ParserX::LEFT_BRACKET: {
+                SExpr* sExpr = new SExpr();
+                parse(sExpr);
+                parent->push_back( sExpr );
+                parent->print();
+                break;
+            }
+            case ParserX::RIGHT_BRACKET:
+                return;
+            case ParserX::ATOM:
+                parent->push_back( new SExpr( token.m_atom.c_str() ) );
+                parent->print();
+                break;
+            case ParserX::END:
+                return;
+            }
+        }
     }
-    return os;
-}
+
+};
+
