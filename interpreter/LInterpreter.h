@@ -14,13 +14,12 @@ class LInterpreter {
     Parser m_parser;
 	LInterpreter();
 
-public: 
-	std::map<std::string, BuiltInFunc> m_builtInFuncMap;
-    std::map<std::string, SExpr*> m_userFuncMap;
-    std::map<std::string, SExpr*> m_variableMap;
-
-    using LocalVariableMap = std::map<std::string, SExpr*>;
-	std::stack<LocalVariableMap> m_stack;
+public:
+	std::map<std::string, BuiltInFunc>  m_builtInFuncMap;
+    std::map<std::string, SExpr*>       m_userFuncMap;
+    
+    NameToSExprMap              m_globalVariableMap;
+	std::stack<NameToSExprMap>  m_stack;
 
 	static LInterpreter& getInstance() {
 		static LInterpreter instance;
@@ -28,11 +27,12 @@ public:
 	}
 
 	void execute(const std::string& lText) {
-        m_parser.parse(lText);
-        const auto* root = m_parser.root();
-        root->print();
-        for( auto* it = root->m_next; it != nullptr; it = it->m_next ) {
-			execute(it);
+        auto* exprs = m_parser.parse( lText, m_globalVariableMap );
+        exprs->print();
+        std::cout << std::endl << std::endl;
+        std::cout << "execution: " << std::endl;
+        for( auto* it = exprs; it != nullptr; it = it->m_next ) {
+			execute(it->m_car);
 		}
 	}
 
@@ -40,8 +40,8 @@ public:
         switch (sExpr->m_type) {
         case SExpr::ATOM:
 			LOG("ATOM");
-            if (auto it = m_variableMap.find(sExpr->m_stringValue);
-				it != m_variableMap.end())
+            if (auto it = m_globalVariableMap.find(sExpr->m_atomName);
+				it != m_globalVariableMap.end())
 			{
 				return it->second;
 			}
@@ -49,21 +49,20 @@ public:
 				return sExpr;
 			}
         case SExpr::LIST:
-			LOG("LIST");
             if (sExpr->isNil() ) {
 				LOG("NULL");
                 return sExpr;
 			}
 			else {
-                auto* funcName = sExpr->m_next;
+                auto* funcName = sExpr->m_car;
                 if ( funcName->m_type == SExpr::ATOM )
                 {
-                    LOGVAR(funcName->m_stringValue);
+                    //LOGVAR(funcName->m_atomName);
 
-                    if ( auto it =  m_builtInFuncMap.find(funcName->m_stringValue);
+                    if ( auto it =  m_builtInFuncMap.find(funcName->m_atomName);
                               it != m_builtInFuncMap.end() )
                     {
-                        return it->second( sExpr->m_next->m_next );
+                        return it->second( sExpr->m_next );
                     }
                     else
                     {
@@ -72,6 +71,7 @@ public:
                 }
                 else
                 {
+                    funcName->print();
                     LOG("must be a function name!");
                 }
 			}

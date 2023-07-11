@@ -11,18 +11,25 @@ LInterpreter::LInterpreter() {
 //	};
 
     m_builtInFuncMap["quote"] = [](SExpr* expr) -> SExpr* {
-        return expr;
+        //expr->print("\ndbg: ");
+        return expr->m_car;
 	};
 
     m_builtInFuncMap["print"] = [](SExpr* expr) -> SExpr* {
 
         SExpr* result = nullptr;
+        //expr->print("\ndbg: ");
 
-        for( auto* it = expr->m_next; it != nullptr; it = it->m_next ) {
-            SExpr* result = LInterpreter::getInstance().execute(it);
-            result->print();
+        for( auto* it = expr; it != nullptr; it = it->m_next ) {
+            SExpr* result = LInterpreter::getInstance().execute(it->m_car);
+            expr->print();
 			std::cout << '_';
 		}
+
+        if ( result == nullptr )
+        {
+            return result;
+        }
 
         return new SExpr;
 	};
@@ -31,10 +38,10 @@ LInterpreter::LInterpreter() {
 //		auto it = exprList.cbegin();
 //		it++;
 //		if (it->m_type == SExpression::ATOM) {
-//			const auto& varName = it->m_stringValue;
+//			const auto& varName = it->m_atomName;
 //			it++;
-//			LInterpreter::getInstance().m_variableMap[varName] = LInterpreter::getInstance().execute(*it);
-//			return LInterpreter::getInstance().m_variableMap[varName];
+//			LInterpreter::getInstance().m_globalVariableMap[varName] = LInterpreter::getInstance().execute(*it);
+//			return LInterpreter::getInstance().m_globalVariableMap[varName];
 //		}
 //		else {
 //			std::cerr << "setvar: expected ATOM" << std::endl;
@@ -47,14 +54,14 @@ LInterpreter::LInterpreter() {
 //		it++;
 //		SExpression result = LInterpreter::getInstance().execute(*it);
 //		result.m_numberValue = 0;
-//		result.m_stringValue = "";
+//		result.m_atomName = "";
 //		while (it != exprList.cend()) {
 //			SExpression temp = LInterpreter::getInstance().execute(*it);
 //			if (temp.m_type == SExpression::NUMBER) {
 //				result.m_numberValue += temp.m_numberValue;
 //			}
 //			else {
-//				result.m_stringValue += temp.m_stringValue;
+//				result.m_atomName += temp.m_atomName;
 //			}
 //			it++;
 //		}

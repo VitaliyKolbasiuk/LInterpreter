@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-class ParserX {
+class Scanner {
     int pos = 0;
 public:
     enum TokenType {
@@ -48,19 +48,19 @@ public:
     }
 };
 
-inline std::ostream& operator<<(std::ostream& os, ParserX::Token const& token) {
+inline std::ostream& operator<<(std::ostream& os, Scanner::Token const& token) {
     switch (token.m_type) {
-    case ParserX::LEFT_BRACKET: {
+    case Scanner::LEFT_BRACKET: {
         os << "LEFT_BRACKET";
         break;
     }
-    case ParserX::RIGHT_BRACKET:
+    case Scanner::RIGHT_BRACKET:
         os << "RIGHT_BRACKET";
         break;
-    case ParserX::ATOM:
+    case Scanner::ATOM:
         os << token.m_atom;
         break;
-    case ParserX::END:
+    case Scanner::END:
         os << "END";
         break;
     }
