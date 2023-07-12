@@ -1,120 +1,15 @@
 #pragma once
 
 #include "Scanner.h"
+#include "SExpr.h"
 #include "Log.h"
 
 #include <iostream>
 #include <map>
 #include <functional>
 
-//---------------------------------------------------------------
-//
-// SExpr - symbolic expression
-//
-//---------------------------------------------------------------
-//
-//  Example of how implemented s-expression: ( a b )
-//
-//  !-------------!        !-------------!
-//  ! SExpr: LIST !   +--->! SExpr: LIST !
-//  !.............!   |    !.............!
-//  ! CAR  ! CDR  !---+    ! CAR  ! CDR  !-->(nullptr)
-//  !------!------!        !------!------!
-//     |                      |
-//     V                      V
-//  !-----------------!    !-----------------!
-//  ! SExpr: ATOM     !    ! SExpr: ATOM     !
-//  !.................!    !.................!
-//  ! value ! name: a !    ! value ! name: b !
-//  !-------!---------!    !-------!---------!
-//
-//---------------------------------------------------------------
-//
-struct SExpr
-{
-    enum Type {
-        LIST=0,
-        ATOM
-    };
 
-    Type    m_type = LIST;
-
-    // CAR
-    union {
-        SExpr*      m_car;
-        SExpr*      m_atomValue;
-    };
-
-    // CDR
-    union {
-        SExpr*      m_next;
-        const char* m_atomName;
-    };
-
-
-    // NIL - "()"
-    SExpr() : m_type(LIST), m_car(nullptr), m_next(nullptr)
-    {}
-
-    // "( carValue )"
-    SExpr( SExpr* carValue ) : m_type(LIST), m_car(carValue), m_next(nullptr)
-    {}
-
-    // atom
-    SExpr( const char* atomName ) : m_type(ATOM), m_atomValue(this),  m_atomName(atomName) {
-        m_atomName = new char[ std::strlen(atomName)+1 ];
-        std::strcpy( (char*)m_atomName, atomName );
-    }
-
-    ~SExpr() {
-        if ( m_type == ATOM ) {
-            if ( m_atomName == nullptr )
-            {
-                delete [] m_atomName;
-            }
-        }
-    }
-
-    bool isNil() const { return m_type==LIST && m_car == nullptr && m_next==nullptr; }
-
-    void setValue( SExpr* value ) { m_car = value; }
-
-    void print( const char* prefix = nullptr ) const
-    {
-        if ( prefix != nullptr )
-        {
-            std::cout << prefix;
-        }
-        
-        switch (m_type)
-        {
-            case LIST:
-            {
-                std::cout << "( " << std::flush;
-                for( const auto* it = this; it != nullptr; it = it->m_next )
-                {
-                    if ( it->m_car == nullptr && m_next != nullptr )
-                    {
-                        std::cout << "NIL " << std::flush;
-                    }
-                    else
-                    {
-                        it->m_car->print();
-                    }
-                }
-                std::cout << " )" << std::flush;
-                break;
-            }
-            case ATOM:
-            {
-                std::cout << m_atomName << ' ' << std::flush;
-                break;
-            }
-        }
-    }
-};
-
-struct ConstCharPtrCompare : public std::binary_function<const char*, const char*, bool> {
+struct ConstCharPtrCompare {
 public:
     bool operator() (const char* str1, const char* str2) const
     { return std::strcmp(str1, str2) < 0; }
@@ -148,14 +43,40 @@ public:
     SExpr* parse( const std::string& expression, NameToSExprMap& globalVariableMap ) {
         m_globalVariableMap = &globalVariableMap;
         m_expression = expression;
-        return parse();
+        SExpr* expr = parse();
+        return expr;
     }
     
     SExpr* parse()
     {
-        SExpr* result = nullptr;
-        SExpr* back   = nullptr;
-        
+        auto token = m_scanner.parseToken(m_expression);
+        switch (token.m_type)
+        {
+            case Scanner::LEFT_BRACKET:
+            {
+                return parseList();
+            }
+            case Scanner::RIGHT_BRACKET:
+            {
+                std::cerr << "unexpected ')'";
+                return nullptr;
+            }
+            case Scanner::ATOM:
+            {
+                return  getAtom( token.m_atom.c_str() );
+            }
+            case Scanner::END:
+            {
+                return nullptr;
+            }
+        }
+    }
+    
+    SExpr* parseList()
+    {
+        SExpr* result = new SExpr{};
+        SExpr* back   = result;
+
         for (;;)
         {
             auto token = m_scanner.parseToken(m_expression);
@@ -164,14 +85,14 @@ public:
             {
                 case Scanner::LEFT_BRACKET:
                 {
-                    SExpr* sExpr = parse();
-                    //sExpr->print();
+                    std::cout << "\n-LB---";
+                    SExpr* sExpr = parseList();
+                    //sExpr->print("\n-sExpr---");
                     if ( sExpr != nullptr )
                     {
-                        if ( result == nullptr )
+                        if ( result->m_car == nullptr )
                         {
-                            result = new SExpr( sExpr );
-                            back   = result;
+                            result->m_car = sExpr;
                         }
                         else
                         {
@@ -179,16 +100,12 @@ public:
                             back = back->m_next;
                         }
                     }
+                    result->print("\n-list-result---");
                     break;
                 }
                 case Scanner::RIGHT_BRACKET:
                 {
-                    if ( result == nullptr )
-                    {
-                        return new SExpr{};
-                    }
-                    result->print("\n--- scanner result: ");
-
+                    result->print("\n--RB-- parser result: ");
                     return result;
                 }
                 case Scanner::ATOM:
@@ -196,29 +113,24 @@ public:
                     LOGVAR( token.m_atom );
                     
                     auto* atom = getAtom( token.m_atom.c_str() );
-                    if ( result == nullptr )
+                    if ( result->m_car == nullptr )
                     {
-                        result = new SExpr( atom );
-                        back   = result;
+                        result->m_car = atom;
                     }
                     else
                     {
                         back->m_next = new SExpr( atom );
                         back = back->m_next;
                     }
+                    result->print("\n-atom-result---");
                     break;
                 }
                 case Scanner::END:
                 {
-                    if ( result == nullptr )
-                    {
-                        return new SExpr();
-                    }
-                    return result;
+                    return nullptr;
                 }
             }
         }
     }
-
 };
 

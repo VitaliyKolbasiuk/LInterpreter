@@ -22,7 +22,14 @@ LInterpreter::LInterpreter() {
 
         for( auto* it = expr; it != nullptr; it = it->m_next ) {
             SExpr* result = LInterpreter::getInstance().execute(it->m_car);
-            expr->print();
+            if ( result != nullptr )
+            {
+                result->print();
+            }
+            else
+            {
+                std::cout << "NIL";
+            }
 			std::cout << '_';
 		}
 

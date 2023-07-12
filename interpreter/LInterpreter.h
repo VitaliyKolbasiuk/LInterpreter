@@ -27,13 +27,10 @@ public:
 	}
 
 	void execute(const std::string& lText) {
-        auto* exprs = m_parser.parse( lText, m_globalVariableMap );
-        exprs->print();
+        auto* expr = m_parser.parse( lText, m_globalVariableMap );
         std::cout << std::endl << std::endl;
         std::cout << "execution: " << std::endl;
-        for( auto* it = exprs; it != nullptr; it = it->m_next ) {
-			execute(it->m_car);
-		}
+        execute( expr );
 	}
 
     SExpr* execute(SExpr* sExpr) {
@@ -57,7 +54,7 @@ public:
                 auto* funcName = sExpr->m_car;
                 if ( funcName->m_type == SExpr::ATOM )
                 {
-                    //LOGVAR(funcName->m_atomName);
+                    //LOGVAR( funcName->m_atomName );
 
                     if ( auto it =  m_builtInFuncMap.find(funcName->m_atomName);
                               it != m_builtInFuncMap.end() )
@@ -66,7 +63,7 @@ public:
                     }
                     else
                     {
-                        // user function map
+                        LOG( "function '" << funcName->m_atomName << "' not defined" );
                     }
                 }
                 else
