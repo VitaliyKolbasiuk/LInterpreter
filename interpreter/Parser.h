@@ -85,7 +85,7 @@ public:
             {
                 case Scanner::LEFT_BRACKET:
                 {
-                    std::cout << "\n-LB---";
+                    //std::cout << "\n-LB---";
                     SExpr* sExpr = parseList();
                     //sExpr->print("\n-sExpr---");
                     if ( sExpr != nullptr )
@@ -96,21 +96,21 @@ public:
                         }
                         else
                         {
-                            back->m_next = new SExpr( sExpr );
-                            back = back->m_next;
+                            back->m_cdr = new SExpr( sExpr );
+                            back = back->m_cdr;
                         }
                     }
-                    result->print("\n-list-result---");
+                    //result->print("\n-list-result---");
                     break;
                 }
                 case Scanner::RIGHT_BRACKET:
                 {
-                    result->print("\n--RB-- parser result: ");
+                    //result->print("\n--RB-- parser result: ");
                     return result;
                 }
                 case Scanner::ATOM:
                 {
-                    LOGVAR( token.m_atom );
+                    //LOGVAR( token.m_atom );
                     
                     auto* atom = getAtom( token.m_atom.c_str() );
                     if ( result->m_car == nullptr )
@@ -119,10 +119,10 @@ public:
                     }
                     else
                     {
-                        back->m_next = new SExpr( atom );
-                        back = back->m_next;
+                        back->m_cdr = new SExpr( atom );
+                        back = back->m_cdr;
                     }
-                    result->print("\n-atom-result---");
+                    //result->print("\n-atom-result---");
                     break;
                 }
                 case Scanner::END:

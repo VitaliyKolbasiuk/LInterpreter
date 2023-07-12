@@ -11,8 +11,13 @@
 using BuiltInFunc = std::function< SExpr* (SExpr*) >;
 
 class LInterpreter {
-    Parser m_parser;
-	LInterpreter();
+public:
+    SExpr*  m_nilAtom = new SExpr("nil");
+
+private:
+    Parser  m_parser;
+    
+    LInterpreter();
 
 public:
 	std::map<std::string, BuiltInFunc>  m_builtInFuncMap;
@@ -26,17 +31,18 @@ public:
 		return instance;
 	}
 
-	void execute(const std::string& lText) {
+    SExpr* eval(const std::string& lText) {
         auto* expr = m_parser.parse( lText, m_globalVariableMap );
         std::cout << std::endl << std::endl;
-        std::cout << "execution: " << std::endl;
-        execute( expr );
+        expr->print("\nparsed expr: ");
+        std::cout << "\n\nevaluation: " << std::endl;
+        return eval( expr );
 	}
 
-    SExpr* execute(SExpr* sExpr) {
+    SExpr* eval(SExpr* sExpr) {
         switch (sExpr->m_type) {
         case SExpr::ATOM:
-			LOG("ATOM");
+			//LOG("ATOM");
             if (auto it = m_globalVariableMap.find(sExpr->m_atomName);
 				it != m_globalVariableMap.end())
 			{
@@ -59,7 +65,7 @@ public:
                     if ( auto it =  m_builtInFuncMap.find(funcName->m_atomName);
                               it != m_builtInFuncMap.end() )
                     {
-                        return it->second( sExpr->m_next );
+                        return it->second( sExpr->m_cdr );
                     }
                     else
                     {

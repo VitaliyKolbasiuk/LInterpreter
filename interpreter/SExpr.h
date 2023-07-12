@@ -30,6 +30,9 @@ struct SExpr
     enum Type {
         LIST=0,
         ATOM
+        //        STRING
+        //        INT
+        //        DOUBLE
     };
 
     Type    m_type = LIST;
@@ -42,17 +45,23 @@ struct SExpr
 
     // CDR
     union {
-        SExpr*      m_next;
+        SExpr*      m_cdr;
         const char* m_atomName;
+        const char* m_stringValue;
+        int         m_intValue;
+        double      m_doubleValue;
     };
 
 
     // NIL - "()"
-    SExpr() : m_type(LIST), m_car(nullptr), m_next(nullptr)
+    SExpr() : m_type(LIST), m_car(nullptr), m_cdr(nullptr)
     {}
 
     // "( carValue )"
-    SExpr( SExpr* carValue ) : m_type(LIST), m_car(carValue), m_next(nullptr)
+    SExpr( SExpr* carValue ) : m_type(LIST), m_car(carValue), m_cdr(nullptr)
+    {}
+
+    SExpr( SExpr* carValue, SExpr* cdrValue ) : m_type(LIST), m_car(carValue), m_cdr(cdrValue)
     {}
 
     // atom
@@ -71,7 +80,7 @@ struct SExpr
         }
     }
 
-    bool isNil() const { return m_type==LIST && m_car == nullptr && m_next==nullptr; }
+    bool isNil() const { return m_type==LIST && m_car == nullptr && m_cdr==nullptr; }
 
     void setValue( SExpr* value ) { m_car = value; }
 
@@ -86,16 +95,16 @@ struct SExpr
         {
             case LIST:
             {
-                if ( m_car == nullptr && m_next == nullptr )
+                if ( m_car == nullptr && m_cdr == nullptr )
                 {
                     std::cout << "NIL " << std::flush;
                     break;
                 }
 
                 std::cout << "( " << std::flush;
-                for( const auto* it = this; it != nullptr; it = it->m_next )
+                for( const auto* it = this; it != nullptr; it = it->m_cdr )
                 {
-                    if ( it->m_car == nullptr && m_next != nullptr )
+                    if ( it->m_car == nullptr && m_cdr != nullptr )
                     {
                         std::cout << "NIL " << std::flush;
                     }
