@@ -33,9 +33,13 @@ public:
 
     SExpr* eval(const std::string& lText) {
         auto* expr = m_parser.parse( lText, m_globalVariableMap );
+        if ( expr == nullptr )
+        {
+            return nullptr;
+        }
         std::cout << std::endl << std::endl;
-        expr->print("\nparsed expr: ");
-        std::cout << "\n\nevaluation: " << std::endl;
+        expr->print("\n# evaluation of: ");
+        std::cout << std::endl;
         return eval( expr );
 	}
 

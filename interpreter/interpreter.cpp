@@ -20,7 +20,8 @@ int main() {
     string input = "(print a) (print b) ";
     
     LInterpreter& lInterpreter = LInterpreter::getInstance();
-    lInterpreter.eval(input);
-    std::cout << "\n\nLInterpreter ended\n";
+    while( lInterpreter.eval(input) != nullptr ) {
+    }
+    std::cout << "\n\n# LInterpreter ended\n\n";
     return 0;
 }

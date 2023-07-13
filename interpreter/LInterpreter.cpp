@@ -45,7 +45,7 @@ LInterpreter::LInterpreter() {
         //expr->print("\ndbg: ");
 
         for( auto* it = expr; it != nullptr; it = it->m_cdr ) {
-            SExpr* result = LInterpreter::getInstance().eval(it->m_car);
+            result = LInterpreter::getInstance().eval(it->m_car);
             if ( result != nullptr )
             {
                 result->print();
@@ -54,15 +54,13 @@ LInterpreter::LInterpreter() {
             {
                 std::cout << "NIL";
             }
-			std::cout << '_';
+            if ( it->m_cdr != nullptr )
+            {
+                std::cout << '_';
+            }
 		}
 
-        if ( result == nullptr )
-        {
-            return result;
-        }
-
-        return new SExpr{};
+        return result;
 	};
 
     m_builtInFuncMap["car"] = [](SExpr* expr) -> SExpr* {
