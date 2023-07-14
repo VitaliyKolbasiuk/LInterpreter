@@ -15,9 +15,8 @@ int main() {
     //string input = "(setvar x (quote a)) (print x)";
     //string input = "(setvar c (quote x)) (defun f(a b) (+ (a b c)) (+ (a b c c))) (print (f x y))";
     //string input = "(print (+ (+ a b)(+ c d)))";
-    
-    
-    string input = "(print a) (print b) ";
+    string input = "(+ (+ a b)(+ c d))";       
+    //string input = "(print a) (print b) ";
     
     LInterpreter& lInterpreter = LInterpreter::getInstance();
     while( lInterpreter.eval(input) != nullptr ) {

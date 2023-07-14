@@ -17,11 +17,6 @@ LInterpreter::LInterpreter() {
     
     m_globalVariableMap["nil"] = m_nilAtom;
 
-    m_builtInFuncMap["test"] = [](SExpr* expr) -> SExpr* {
-//        auto it* = expr;
-//        it->m_car;
-//        return result;
-    };
 
 
     //--------------------------------------------------------------------------------
@@ -93,6 +88,7 @@ LInterpreter::LInterpreter() {
         return new SExpr{ firstArg, secondArg };
     };
 
+   
     // (set x 1) -> 1
     // (set x) -> nil
     // (set x 1 2 3) -> ?
@@ -110,22 +106,23 @@ LInterpreter::LInterpreter() {
 
     // (+ a b c ) -> atom("abc")
     // (+ a (b c) d) -> atom("ad")
-//	m_builtInFuncMap["+"] = [](const std::list<SExpression>& exprList) -> SExpression {
-//		auto it = exprList.cbegin();
-//		it++;
-//		SExpression result = LInterpreter::getInstance().execute(*it);
-//		result.m_numberValue = 0;
-//		result.m_atomName = "";
-//		while (it != exprList.cend()) {
-//			SExpression temp = LInterpreter::getInstance().execute(*it);
-//			if (temp.m_type == SExpression::NUMBER) {
-//				result.m_numberValue += temp.m_numberValue;
-//			}
-//			else {
-//				result.m_atomName += temp.m_atomName;
-//			}
-//			it++;
-//		}
-//		return result;
-//	};
+    m_builtInFuncMap["+"] = [](SExpr* expr) -> SExpr* {
+        SExpr* result = nullptr;
+        std::string temp;
+        for (auto* it = expr; it != nullptr; it = it->m_cdr) {
+            if (it->m_car->m_type == SExpr::ATOM) {
+                temp += it->m_car->m_stringValue;
+            }
+            else {
+                LInterpreter::getInstance().eval(it->m_car);
+            }
+            if (it->m_cdr != nullptr)
+            {
+                std::cout << '_';
+            }
+        }
+        std::cout << temp << std::endl;
+        return new SExpr{};
+    };
+
 }
