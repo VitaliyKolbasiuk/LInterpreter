@@ -30,7 +30,6 @@ struct SExpr
     enum Type {
         LIST=0,
         ATOM
-        //        STRING
         //        INT
         //        DOUBLE
     };
@@ -47,7 +46,6 @@ struct SExpr
     union {
         SExpr*      m_cdr;
         const char* m_atomName;
-        const char* m_stringValue;
         int         m_intValue;
         double      m_doubleValue;
     };
