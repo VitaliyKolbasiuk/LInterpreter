@@ -114,7 +114,10 @@ LInterpreter::LInterpreter() {
                 temp += it->m_car->m_stringValue;
             }
             else {
-                LInterpreter::getInstance().eval(it->m_car);
+                auto x = LInterpreter::getInstance().eval(it->m_car);
+                if (x->m_type == SExpr::ATOM) {
+                    temp += x->m_car->m_stringValue;
+                }
             }
             if (it->m_cdr != nullptr)
             {
@@ -122,7 +125,7 @@ LInterpreter::LInterpreter() {
             }
         }
         std::cout << temp << std::endl;
-        return new SExpr{};
+        return new SExpr{temp.c_str()};
     };
 
 }

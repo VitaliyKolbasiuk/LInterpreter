@@ -1,3 +1,4 @@
-﻿  interpreter.cpp
-X:\C++\Projects C++\interpreter\interpreter\Parser.h(24,1): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
-  interpreter.vcxproj -> X:\C++\Projects C++\interpreter\x64\Debug\interpreter.exe
+﻿  LInterpreter.cpp
+C:\Users\38066\Desktop\cplusplus\LInterpreter\interpreter\Scanner.h(24,1): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\38066\Desktop\cplusplus\LInterpreter\interpreter\Parser.h(73): warning C4715: Parser::parse: значение возвращается не при всех путях выполнения
+  interpreter.vcxproj -> C:\Users\38066\Desktop\cplusplus\LInterpreter\x64\Debug\interpreter.exe
