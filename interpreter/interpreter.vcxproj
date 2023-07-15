@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="interpreter.cpp" />
     <ClCompile Include="LInterpreter.cpp" />
+    <ClCompile Include="pseudoTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LInterpreter.h" />

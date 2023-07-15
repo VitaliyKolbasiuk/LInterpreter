@@ -1,5 +1,4 @@
 #include "LInterpreter.h"
-
 /*
  (rect (position 100 20) (size 20 30) (color 0xFFCC00) (fillcolor 0xFFFFFF) (text "Some textz"))
  (rect (position 100 20) (size 20 30) (color 0xFFCC00))
@@ -7,6 +6,9 @@
 
 // (defun test (p1 p2) (print (+ p1 p2)) )
 LInterpreter::LInterpreter() {
+
+    addPseudoTableFuncs();
+
 	m_builtInFuncMap["defun"] = [](SExpr* expr) -> SExpr* {
         
         // get funcName = 'test'
@@ -29,6 +31,8 @@ LInterpreter::LInterpreter() {
         auto* result = LInterpreter::getInstance().m_parser.parse( expr->m_car->m_atomName, LInterpreter::getInstance().m_globalVariableMap );
         return result;
     };
+
+
 
     //--------------------------------------------------------------------------------
     // (eval expr) ->
@@ -92,7 +96,7 @@ LInterpreter::LInterpreter() {
     };
 
    
-    // (set x 1) -> 1
+    // (set x 1) -> 1   
     // (set x) -> nil
     // (set x 1 2 3) -> ?
     // (set x '(1 2 3)) -> (1 2 3)

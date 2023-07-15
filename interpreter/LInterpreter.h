@@ -18,7 +18,7 @@ private:
     Parser  m_parser;
     
     LInterpreter();
-
+    void addPseudoTableFuncs();
 public:
 	std::map<std::string, BuiltInFunc>  m_builtInFuncMap;
     std::map<std::string, SExpr*>       m_userFuncMap;
@@ -51,7 +51,7 @@ public:
                 return sExpr->m_atomValue;
             }
             case SExpr::LIST:
-            {
+            {   
                 if (sExpr->isNil() ) {
                     LOG("NULL");
                     return sExpr;
