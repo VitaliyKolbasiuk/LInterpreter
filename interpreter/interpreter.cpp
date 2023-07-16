@@ -38,7 +38,7 @@ int main() {
     //string input = "(print (+ (+ a b)(+ c d)))";
     //string input = "(print a) (print b) ";
     
-    string input = "(printRect 20 15)";
+    string input = "(printRect (25 50))";
 
     LInterpreter& lInterpreter = LInterpreter::getInstance();
     while( lInterpreter.eval(input) != nullptr ) {

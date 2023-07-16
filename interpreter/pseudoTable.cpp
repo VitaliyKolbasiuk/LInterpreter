@@ -3,8 +3,8 @@
 void LInterpreter::addPseudoTableFuncs() {
 
     m_builtInFuncMap["printRect"] = [](SExpr* expr) -> SExpr* {
-        int height = atoi(expr->m_car->m_atomName); // TODO
-        int width = atoi(expr->m_cdr->m_car->m_atomName); // TODO
+        int height = atoi(expr->m_car->m_car->m_atomName);
+        int width = atoi(expr->m_car->m_cdr->m_car->m_atomName);
 
         std::string answer = "";
         for (int j = 0; j < height; ++j) {

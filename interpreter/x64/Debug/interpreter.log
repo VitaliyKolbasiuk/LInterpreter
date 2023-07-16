@@ -1,4 +1,3 @@
-﻿  interpreter.cpp
-C:\Users\csvit\source\repos\LInterpreter\interpreter\Scanner.h(24,1): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
-C:\Users\csvit\source\repos\LInterpreter\interpreter\Parser.h(73): warning C4715: Parser::parse: значение возвращается не при всех путях выполнения
-  interpreter.vcxproj -> C:\Users\csvit\Source\Repos\LInterpreter\x64\Debug\interpreter.exe
+﻿  pseudoTable.cpp
+X:\C++\Projects C++\interpreter\LInterpreter\interpreter\Scanner.h(24,1): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+  interpreter.vcxproj -> X:\C++\Projects C++\interpreter\LInterpreter\x64\Debug\interpreter.exe
