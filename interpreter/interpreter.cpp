@@ -38,7 +38,7 @@ int main() {
     //string input = "(print (+ (+ a b)(+ c d)))";
     //string input = "(print a) (print b) ";
     
-    string input = "(set p1 xxx) (defun test (p1 p2 p3) (print (+ p1 p2 p3)) ) (test a b c) (print p1)";
+    string input = "(printRect 20 15)";
 
     LInterpreter& lInterpreter = LInterpreter::getInstance();
     while( lInterpreter.eval(input) != nullptr ) {
