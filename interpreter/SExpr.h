@@ -25,13 +25,95 @@
 //
 //---------------------------------------------------------------
 //
+
+class ISExpr
+{
+public:
+    enum Type {
+        LIST=0,
+        ATOM,
+        INT,
+        DOUBLE,
+        STRING,
+        WSTRING,
+        ARRAY
+    };
+
+protected:
+    ISExpr() = default;
+    virtual ~ISExpr() = default;
+
+    virtual Type type() const = 0;
+    virtual ISExpr* print(  std::ostream& stream ) const = 0;
+};
+
+// List
+class List : protected ISExpr
+{
+public:
+    ISExpr* m_car = nullptr;
+    List*   m_cdr = nullptr;
+
+public:
+    List() : m_car(nullptr), m_cdr(nullptr) {};
+    List( ISExpr* car ) : m_car(car), m_cdr(nullptr) {};
+    List( ISExpr* car, List* cdr ) : m_car(car), m_cdr(cdr) {};
+    virtual ~List() {}
+
+    Type type() const override { return LIST; }
+
+    ISExpr* print( std::ostream& stream = std::cout ) const override
+    {
+        stream << "( ";
+        if ( m_car == nullptr )
+        {
+            stream << "nil";
+        }
+        else
+        {
+            m_cdr->print(stream);
+        }
+        
+        for( List* it = m_cdr; it != nullptr; it=it->m_cdr )
+        {
+            stream << " ";
+            it->print(stream);
+        }
+
+        stream << " )";
+    }
+};
+
+// Atom
+class Atom : protected ISExpr
+{
+    const char* m_name;
+    ISExpr*     m_value = this;
+
+public:
+    Atom( const char* name ) : m_name(name), m_value(this) {};
+    Atom( const char* name, ISExpr* value ) : m_name(name), m_value(value) {};
+    virtual ~Atom() { delete [] m_name; }
+
+    Type type() const override { return ATOM; }
+
+    ISExpr* print( std::ostream& stream = std::cout ) const override
+    {
+        stream << m_name;
+    }
+
+    const char* name() const { return m_name; }
+    ISExpr*     value() const { return m_value; }
+    void        setValue( ISExpr* newValue ) { m_value = newValue; }
+};
+
 struct SExpr
 {
     enum Type {
         LIST=0,
-        ATOM
-        //        INT
-        //        DOUBLE
+        ATOM,
+        INT,
+        DOUBLE
     };
 
     Type    m_type = LIST;

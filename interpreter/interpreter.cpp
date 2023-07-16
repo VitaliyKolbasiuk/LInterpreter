@@ -38,11 +38,19 @@ int main() {
     //string input = "(print (+ (+ a b)(+ c d)))";
     //string input = "(print a) (print b) ";
     
+    
+    std::cout << sizeof(ISExpr) << std::endl;
+    std::cout << offsetof(ISExpr,m_cdr) << std::endl; ;
+    return 0;
+    
+    
     string input = "(printRect (25 50))";
 
     LInterpreter& lInterpreter = LInterpreter::getInstance();
     while( lInterpreter.eval(input) != nullptr ) {
     }
     std::cout << "\n\n# LInterpreter ended\n\n";
+    
+    
     return 0;
 }
