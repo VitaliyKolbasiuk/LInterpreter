@@ -14,7 +14,7 @@ public:
     bool operator() (const char* str1, const char* str2) const
     { return std::strcmp(str1, str2) < 0; }
 };
-using NameToSExprMap = std::map<const char*, SExpr*, ConstCharPtrCompare>;
+using NameToSExprMap = std::map<const char*, Atom*, ConstCharPtrCompare>;
 
 
 //
@@ -27,27 +27,27 @@ class Parser
 
     NameToSExprMap* m_globalVariableMap;
 
-    SExpr* getAtom( const char* name )
+    Atom* getAtom( const char* name )
     {
         if ( auto it = m_globalVariableMap->find( name ); it != m_globalVariableMap->end() )
         {
             return it->second;
         }
         
-        auto* atom = new SExpr(name);
-        (*m_globalVariableMap)[atom->m_atomName] = atom;
+        auto* atom = new Atom(name);
+        (*m_globalVariableMap)[atom->name()] = atom;
         return atom;
     }
 
 public:
-    SExpr* parse( const std::string& expression, NameToSExprMap& globalVariableMap ) {
+    ISExpr* parse( const std::string& expression, NameToSExprMap& globalVariableMap ) {
         m_globalVariableMap = &globalVariableMap;
         m_expression = expression;
-        SExpr* expr = parse();
+        ISExpr* expr = parse();
         return expr;
     }
     
-    SExpr* parse()
+    ISExpr* parse()
     {
         auto token = m_scanner.parseToken(m_expression);
         switch (token.m_type)
@@ -63,6 +63,11 @@ public:
             }
             case Scanner::ATOM:
             {
+                // не число ли это -> new IntNumber() or DoubleNumber()
+                return  getAtom( token.m_atom.c_str() );
+            }
+            case Scanner::STRING:
+            {
                 return  getAtom( token.m_atom.c_str() );
             }
             case Scanner::END:
@@ -72,10 +77,10 @@ public:
         }
     }
     
-    SExpr* parseList()
+    List* parseList()
     {
-        SExpr* result = new SExpr{};
-        SExpr* back   = result;
+        List* result = new List();
+        List* back   = result;
 
         for (;;)
         {
@@ -86,7 +91,7 @@ public:
                 case Scanner::LEFT_BRACKET:
                 {
                     //std::cout << "\n-LB---";
-                    SExpr* sExpr = parseList();
+                    List* sExpr = parseList();
                     //sExpr->print("\n-sExpr---");
                     if ( sExpr != nullptr )
                     {
@@ -96,7 +101,7 @@ public:
                         }
                         else
                         {
-                            back->m_cdr = new SExpr( sExpr );
+                            back->m_cdr = new List( sExpr );
                             back = back->m_cdr;
                         }
                     }
@@ -119,7 +124,7 @@ public:
                     }
                     else
                     {
-                        back->m_cdr = new SExpr( atom );
+                        back->m_cdr = new List( atom );
                         back = back->m_cdr;
                     }
                     //result->print("\n-atom-result---");

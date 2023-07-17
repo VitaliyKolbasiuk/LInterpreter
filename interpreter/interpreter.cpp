@@ -33,18 +33,14 @@ int main() {
     //string input = "(print (print1 (a b c)) (print2 (a b c)) )";
     //string input = "(print (quote (a b c)) (quote (1 2 3)))";
     //string input = "(setvar x (quote a)) (print x)";
-    //string input = "(setvar c (quote x)) (defun f(a b) (+ (a b c)) (+ (a b c c))) (print (f x y))";
+    string input = "(set c (quote z)) (defun f(a b) (+ a c b c)) (print (f x y))";
+    //string input = "(defun f(a b) (+ a b c) (+ a b c c)) (print (f x y))";
     //string input = "(print (+ (+ a b)(+ c d)))";
     //string input = "(print (+ (+ a b)(+ c d)))";
     //string input = "(print a) (print b) ";
     
     
-    std::cout << sizeof(ISExpr) << std::endl;
-    std::cout << offsetof(ISExpr,m_cdr) << std::endl; ;
-    return 0;
-    
-    
-    string input = "(printRect (25 50))";
+//    string input = "(printRect (25 50))";
 
     LInterpreter& lInterpreter = LInterpreter::getInstance();
     while( lInterpreter.eval(input) != nullptr ) {

@@ -9,15 +9,16 @@ LInterpreter::LInterpreter() {
 
     addPseudoTableFuncs();
 
-	m_builtInFuncMap["defun"] = [](SExpr* expr) -> SExpr* {
+    // Add user fuction
+	m_builtInFuncMap["defun"] = [](List* expr) -> ISExpr* {
         
         // get funcName = 'test'
-        auto* funcName = expr->m_car;
+        auto* funcName = (Atom*) expr->m_car;
         
         // 'test' = ((p1 p2 p3) (print (+ p1 p2 p3)))
-        funcName->m_atomValue = expr->m_cdr;
+        funcName->setValue( expr->m_cdr );
         
-        return funcName->m_atomValue;
+        return funcName->value();
 	};
     
     m_globalVariableMap["nil"] = m_nilAtom;
@@ -27,30 +28,30 @@ LInterpreter::LInterpreter() {
     //--------------------------------------------------------------------------------
     // (parse "(print (cons (a b c) (1 2 3)))") -> (print (cons (a b c) (1 2 3)))
     //--------------------------------------------------------------------------------
-    m_builtInFuncMap["parse"] = [](SExpr* expr) -> SExpr* {
-        auto* result = LInterpreter::getInstance().m_parser.parse( expr->m_car->m_atomName, LInterpreter::getInstance().m_globalVariableMap );
-        return result;
-    };
+//    m_builtInFuncMap["parse"] = [](List* expr) -> ISExpr* {
+//        auto* result = LInterpreter::getInstance().m_parser.parse( expr->m_car->m_atomName, LInterpreter::getInstance().m_globalVariableMap );
+//        return result;
+//    };
 
 
 
     //--------------------------------------------------------------------------------
     // (eval expr) ->
     //--------------------------------------------------------------------------------
-    m_builtInFuncMap["quote"] = [](SExpr* expr) -> SExpr* {
-        return LInterpreter::getInstance().eval( expr );
+    m_builtInFuncMap["quote"] = [](List* expr) -> ISExpr* {
+        return expr->m_car;
     };
 
-    m_builtInFuncMap["print"] = [](SExpr* expr) -> SExpr* {
-
-        SExpr* result = nullptr;
+    // (print (+ a b) (+ d c) )
+    m_builtInFuncMap["print"] = [](List* expr) -> ISExpr* {
+        ISExpr* result = LInterpreter::getInstance().m_nilAtom;
         //expr->print("\ndbg: ");
 
         for( auto* it = expr; it != nullptr; it = it->m_cdr ) {
             result = LInterpreter::getInstance().eval(it->m_car);
             if ( result != nullptr )
             {
-                result->print();
+                result->print( std::cout );
             }
             else
             {
@@ -65,7 +66,7 @@ LInterpreter::LInterpreter() {
         return result;
 	};
 
-    m_builtInFuncMap["car"] = [](SExpr* expr) -> SExpr* {
+    m_builtInFuncMap["car"] = [](List* expr) -> ISExpr* {
         if ( expr == nullptr )
         {
             return LInterpreter::getInstance().m_nilAtom;
@@ -73,7 +74,7 @@ LInterpreter::LInterpreter() {
         return expr->m_car;
     };
 
-    m_builtInFuncMap["cdr"] = [](SExpr* expr) -> SExpr* {
+    m_builtInFuncMap["cdr"] = [](List* expr) -> ISExpr* {
         if ( expr == nullptr )
         {
             return LInterpreter::getInstance().m_nilAtom;
@@ -81,7 +82,7 @@ LInterpreter::LInterpreter() {
         return expr->m_cdr;
     };
 
-    m_builtInFuncMap["cons"] = [](SExpr* expr) -> SExpr* {
+    m_builtInFuncMap["cons"] = [](List* expr) -> ISExpr* {
         if ( expr == nullptr )
         {
             return LInterpreter::getInstance().m_nilAtom;
@@ -92,7 +93,7 @@ LInterpreter::LInterpreter() {
         auto* firstArg = expr->m_car;
         auto* secondArg = expr->m_cdr->m_car;
 
-        return new SExpr{ firstArg, secondArg };
+        return new List( (List*)firstArg, (List*)secondArg );
     };
 
    
@@ -100,43 +101,40 @@ LInterpreter::LInterpreter() {
     // (set x) -> nil
     // (set x 1 2 3) -> ?
     // (set x '(1 2 3)) -> (1 2 3)
-    m_builtInFuncMap["set"] = [](SExpr* expr) -> SExpr*
+    m_builtInFuncMap["set"] = [](List* expr) -> ISExpr*
     {
         if ( expr == nullptr )
         {
             return LInterpreter::getInstance().m_nilAtom;
         }
-        auto* var= expr->m_car;
+        auto* var= (Atom*) expr->m_car;
         auto* value = (expr->m_cdr==nullptr) ? LInterpreter::getInstance().m_nilAtom
-                                                 : expr->m_cdr->m_car;
-        var->m_atomValue = value;
+                                                 : LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+        var->setValue( value );
         return value;
     };
 
     // (+ a b c ) -> atom("abc")
     // (+ a (b c) d) -> atom("ad")
-    m_builtInFuncMap["+"] = [](SExpr* expr) -> SExpr*
+    m_builtInFuncMap["+"] = [](List* expr) -> ISExpr*
     {
-        SExpr* result = nullptr;
-        std::string resturnValue;
+        ISExpr* result = nullptr;
+        std::string returnValue;
         
-        expr->print("expr: ");
+        //expr->print("+ arguments: ");
         for (auto* it = expr; it != nullptr; it = it->m_cdr)
         {
             //it->m_car->print("\nit->m_car: ");
             auto* value = LInterpreter::getInstance().eval( it->m_car );
             //value->print("\nvalue: ");
-            if (value->m_car->m_type == SExpr::ATOM) {
-                resturnValue += value->m_atomName;
+            if (value->type() == ISExpr::ATOM) {
+                returnValue += ((Atom*)value)->name();
             }
             else {
-//                auto x = LInterpreter::getInstance().eval(value->m_car);
-//                if (x->m_type == SExpr::ATOM) {
-//                    resturnValue += x->m_car->m_stringValue;
-//                }
+                // error?
             }
         }
-        return new SExpr{resturnValue.c_str()};
+        return new Atom( returnValue.c_str() );
     };
 
 }

@@ -2,9 +2,10 @@
 
 void LInterpreter::addPseudoTableFuncs() {
 
-    m_builtInFuncMap["printRect"] = [](SExpr* expr) -> SExpr* {
-        int height = atoi(expr->m_car->m_car->m_atomName);
-        int width = atoi(expr->m_car->m_cdr->m_car->m_atomName);
+    m_builtInFuncMap["printRect"] = [](List* expr) -> ISExpr* {
+        List* parameterList = (List*) expr->m_car;
+        int height = atoi( ((Atom*)(parameterList->m_car))->name() );
+        int width = atoi( ((Atom*)(parameterList->m_cdr->m_car))->name() );
 
         std::string answer = "";
         for (int j = 0; j < height; ++j) {
@@ -34,7 +35,7 @@ void LInterpreter::addPseudoTableFuncs() {
             }
         }
         std::cout << answer;
-        return new SExpr{};
+        return new List();
     };
     return;
 }

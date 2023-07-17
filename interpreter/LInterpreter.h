@@ -8,11 +8,11 @@
 #include <functional>
 #include <forward_list>
 
-using BuiltInFunc = std::function< SExpr* (SExpr*) >;
+using BuiltInFunc = std::function< ISExpr* (List*) >;
 
 class LInterpreter {
 public:
-    SExpr*  m_nilAtom = new SExpr("nil");
+    Atom*  m_nilAtom = new Atom("nil");
 
 private:
     Parser  m_parser;
@@ -21,7 +21,7 @@ private:
     void addPseudoTableFuncs();
 public:
 	std::map<std::string, BuiltInFunc>  m_builtInFuncMap;
-    std::map<std::string, SExpr*>       m_userFuncMap;
+    std::map<std::string, List*>        m_userFuncMap;
     
     NameToSExprMap m_globalVariableMap;
 
@@ -30,7 +30,7 @@ public:
 		return instance;
 	}
 
-    SExpr* eval(const std::string& lText) {
+    ISExpr* eval(const std::string& lText) {
         auto* expr = m_parser.parse( lText, m_globalVariableMap );
         if ( expr == nullptr )
         {
@@ -42,67 +42,77 @@ public:
         return eval( expr );
 	}
 
-    SExpr* eval(SExpr* sExpr)
+    ISExpr* eval(ISExpr* sExpr0)
     {
-        switch (sExpr->m_type)
+        switch (sExpr0->type())
         {
-            case SExpr::ATOM:
+            case ISExpr::ATOM:
             {
-                return sExpr->m_atomValue;
+                return ((Atom*)sExpr0)->value();
             }
-            case SExpr::LIST:
-            {   
-                if (sExpr->isNil() ) {
+            case ISExpr::LIST:
+            {
+                List* sExpr = (List*) sExpr0;
+                if (sExpr->isEmptyList() ) {
                     LOG("NULL");
                     return sExpr;
                 }
                 else {
                     auto* funcName = sExpr->m_car;
-                    if ( funcName->m_type == SExpr::ATOM )
+                    if ( funcName->type() == ISExpr::ATOM )
                     {
                         //LOGVAR( funcName->m_atomName );
 
-                        if ( auto it =  m_builtInFuncMap.find(funcName->m_atomName);
+                        if ( auto it =  m_builtInFuncMap.find( ((Atom*)funcName)->name() );
                                   it != m_builtInFuncMap.end() )
                         {
+                            // applay lambda function
                             return it->second( sExpr->m_cdr );
                         }
                         else
                         {
-                            LOG( "function '" << funcName->m_atomName << "' not defined" );
-                            evalUserDefinedFunc( sExpr );
+                            //LOG( "function '" << ((Atom*)funcName)->name() << "' not defined" );
+                            return evalUserDefinedFunc( sExpr );
                         }
                     }
                     else
                     {
-                        funcName->print();
+                        funcName->print("error: ");
                         LOG("must be a function name!");
                     }
                 }
                 break;
             }
 		}
-        return new SExpr{};
+        return m_nilAtom;
 	}
     
-    SExpr* evalUserDefinedFunc( SExpr* sExpr )
+    ISExpr* evalUserDefinedFunc( List* sExpr )
     {
-        sExpr->print("sExpr:");
+        //sExpr->print("sExpr:");
         auto* funcName = sExpr->m_car;
         auto* parameters = sExpr->m_cdr;
-//        parameters->print("\nparameters:");
+        //parameters->print("\nparameters:");
 
-        auto* funcDefinition = funcName->m_atomValue;
-//        funcDefinition->print("\nfuncDefinition:");
+        auto* funcDefinition = ((Atom*)funcName)->value();
+        //funcDefinition->print("\nfuncDefinition:");
+        
+        if ( funcDefinition->type() != ISExpr::LIST )
+        {
+            std::cerr << "\nbad definition of user function: ";
+            funcDefinition->print( std::cerr );
+            std::cerr << "\n";
+            return m_nilAtom;
+        }
 
-        auto* argList = funcDefinition->m_car;
-//        argList->print("\nargList:");
+        auto* argList = (List*) ((List*)funcDefinition)->m_car;
+        //argList->print("\nargList:");
 
-        auto* funcBody = funcDefinition->m_cdr->m_car;
-  //      funcBody->print("\nfuncBody:");
+        auto* funcBody = ((List*)funcDefinition)->m_cdr->m_car;
+        //funcBody->print("\nfuncBody:");
         
         // copy
-        struct AtomValue { SExpr* atom; SExpr* value; };
+        struct AtomValue { Atom* atom; ISExpr* value; };
         std::forward_list<AtomValue> savedList;
         
         auto* parameterIt = parameters;
@@ -110,23 +120,23 @@ public:
         {
 //            it->m_car->m_atomValue->print("\nbefore save:");
 
-            savedList.push_front( AtomValue{ it->m_car, it->m_car->m_atomValue } );
+            savedList.push_front( AtomValue{ (Atom*)it->m_car, ((Atom*)(it->m_car))->value() } );
             
             if ( parameterIt != nullptr )
             {
                 // substitute/replace argumement value by parameters
-                parameterIt->m_car->print("\n");
-                it->m_car->m_atomValue = parameterIt->m_car;
+                //parameterIt->m_car->print("\n");
+                ((Atom*)(it->m_car))->setValue( parameterIt->m_car );
                 parameterIt = parameterIt->m_cdr;
             }
             else
             {
-                it->m_car->m_atomValue = m_nilAtom;
+                ((Atom*)(it->m_car))->setValue( m_nilAtom );
             }
 //            it->m_car->m_atomValue->print("\nafter save:");
         }
 
-        eval( funcBody );
+        auto retValue = eval( funcBody );
 
         // restore atom values
         while( !savedList.empty() )
@@ -136,12 +146,12 @@ public:
             auto* value = front.value;
             
 //            atom->m_car->print("\nbefore restore:");
-            atom->m_car = value;
+            atom->setValue( value );
 //            atom->m_car->print("\nafter restore:");
             
             savedList.pop_front();
         }
 
-        return nullptr;
+        return retValue;
     }
 };

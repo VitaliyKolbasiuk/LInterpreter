@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Log.h"
 #include <iostream>
 
 class Scanner {
@@ -9,6 +10,7 @@ public:
         LEFT_BRACKET,
         RIGHT_BRACKET,
         ATOM,
+        STRING,
         END
     };
 
@@ -27,11 +29,16 @@ public:
             switch (c) {
             case '(':
                 pos++;
+                //LOG( "(" );
                 return Token(LEFT_BRACKET);
             case ')':
                 pos++;
+                //LOG( ")" );
                 return Token(RIGHT_BRACKET);
             case ' ':
+            case '\n':
+            case '\r':
+            case '\t':
                 pos++;
                 break; // nothing
             default:
@@ -40,6 +47,7 @@ public:
                     atom.m_atom.push_back(expression[pos]);
                     pos++;
                 }
+                //LOG( "atom:"  << atom.m_atom );
                 return atom;
             }
         }
