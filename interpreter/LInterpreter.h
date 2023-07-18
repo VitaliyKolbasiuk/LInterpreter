@@ -48,11 +48,11 @@ public:
         {
             case ISExpr::ATOM:
             {
-                return ((Atom*)sExpr0)->value();
+                return sExpr0->toAtom()->value();
             }
             case ISExpr::LIST:
             {
-                List* sExpr = (List*) sExpr0;
+                List* sExpr = sExpr0->toList();
                 if (sExpr->isEmptyList() ) {
                     LOG("NULL");
                     return sExpr;
@@ -63,7 +63,7 @@ public:
                     {
                         //LOGVAR( funcName->m_atomName );
 
-                        if ( auto it =  m_builtInFuncMap.find( ((Atom*)funcName)->name() );
+                        if ( auto it =  m_builtInFuncMap.find( funcName->toAtom()->name() );
                                   it != m_builtInFuncMap.end() )
                         {
                             // applay lambda function
@@ -90,11 +90,11 @@ public:
     ISExpr* evalUserDefinedFunc( List* sExpr )
     {
         //sExpr->print("sExpr:");
-        auto* funcName = sExpr->m_car;
+        auto* funcName = sExpr->m_car->toAtom();
         auto* parameters = sExpr->m_cdr;
         //parameters->print("\nparameters:");
 
-        auto* funcDefinition = ((Atom*)funcName)->value();
+        auto* funcDefinition = funcName->value()->toList();
         //funcDefinition->print("\nfuncDefinition:");
         
         if ( funcDefinition->type() != ISExpr::LIST )
@@ -105,10 +105,10 @@ public:
             return m_nilAtom;
         }
 
-        auto* argList = (List*) ((List*)funcDefinition)->m_car;
+        auto* argList = funcDefinition->m_car->toList();
         //argList->print("\nargList:");
 
-        auto* funcBody = ((List*)funcDefinition)->m_cdr->m_car;
+        auto* funcBody = funcDefinition->m_cdr->m_car->toList();
         //funcBody->print("\nfuncBody:");
         
         // copy
@@ -120,18 +120,18 @@ public:
         {
 //            it->m_car->m_atomValue->print("\nbefore save:");
 
-            savedList.push_front( AtomValue{ (Atom*)it->m_car, ((Atom*)(it->m_car))->value() } );
+            savedList.push_front( AtomValue{ it->m_car->toAtom(), it->m_car->toAtom()->value() } );
             
             if ( parameterIt != nullptr )
             {
                 // substitute/replace argumement value by parameters
                 //parameterIt->m_car->print("\n");
-                ((Atom*)(it->m_car))->setValue( parameterIt->m_car );
+                it->m_car->toAtom()->setValue( parameterIt->m_car );
                 parameterIt = parameterIt->m_cdr;
             }
             else
             {
-                ((Atom*)(it->m_car))->setValue( m_nilAtom );
+                it->m_car->toAtom()->setValue( m_nilAtom );
             }
 //            it->m_car->m_atomValue->print("\nafter save:");
         }

@@ -26,6 +26,10 @@
 //---------------------------------------------------------------
 //
 
+class List;
+class Atom;
+class IntNumber;
+
 //----------
 // ISExpr
 //----------
@@ -37,7 +41,7 @@ public:
         BUILT_IN_FUNC,
         USER_FUNC,
         ATOM,
-        INT,
+        INT_NUMBER,
         DOUBLE,
         STRING,
         WSTRING,
@@ -53,6 +57,34 @@ public:
     virtual ISExpr* print(  std::ostream& stream ) const = 0;
 
     ISExpr* print(  const char* prefix ) const { std::cout << prefix; print(std::cout); };
+
+    List*   toList() {
+        if ( type() != LIST )
+        {
+            __asm { int 3 }
+            return nullptr;
+        }
+        return (List*) this;
+    }
+    
+    Atom*   toAtom() {
+        if ( type() != ATOM )
+        {
+            __asm { int 3 }
+            return nullptr;
+        }
+        return (Atom*) this;
+    }
+    
+    IntNumber*  toIntNumber() {
+        if ( type() != INT_NUMBER )
+        {
+            __asm { int 3 }
+            return nullptr;
+        }
+        return (IntNumber*) this;
+    }
+    
 };
 
 //------------------------
@@ -131,3 +163,22 @@ public:
     void        setValue( ISExpr* newValue ) { m_value = newValue; }
 };
 
+//------------------------
+// IntNumber
+//------------------------
+
+class IntNumber: public ISExpr
+{
+    int64_t m_value;
+public:
+    IntNumber( int64_t value ) : m_value(value) {}
+    
+    Type type() const override { return INT_NUMBER; }
+
+    ISExpr* print( std::ostream& stream = std::cout ) const override
+    {
+        stream << m_value;
+    }
+
+    int64_t& value() { return m_value; }
+};

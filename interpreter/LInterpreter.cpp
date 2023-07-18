@@ -13,7 +13,7 @@ LInterpreter::LInterpreter() {
 	m_builtInFuncMap["defun"] = [](List* expr) -> ISExpr* {
         
         // get funcName = 'test'
-        auto* funcName = (Atom*) expr->m_car;
+        auto* funcName = expr->m_car->toAtom();
         
         // 'test' = ((p1 p2 p3) (print (+ p1 p2 p3)))
         funcName->setValue( expr->m_cdr );
@@ -91,9 +91,9 @@ LInterpreter::LInterpreter() {
         std::cout << std::endl;
         
         auto* firstArg = expr->m_car;
-        auto* secondArg = expr->m_cdr->m_car;
+        auto* secondArg = expr->m_cdr->m_car->toList();
 
-        return new List( (List*)firstArg, (List*)secondArg );
+        return new List( firstArg, secondArg );
     };
 
    
@@ -107,7 +107,7 @@ LInterpreter::LInterpreter() {
         {
             return LInterpreter::getInstance().m_nilAtom;
         }
-        auto* var= (Atom*) expr->m_car;
+        auto* var= expr->m_car->toAtom();
         auto* value = (expr->m_cdr==nullptr) ? LInterpreter::getInstance().m_nilAtom
                                                  : LInterpreter::getInstance().eval( expr->m_cdr->m_car );
         var->setValue( value );
@@ -128,7 +128,7 @@ LInterpreter::LInterpreter() {
             auto* value = LInterpreter::getInstance().eval( it->m_car );
             //value->print("\nvalue: ");
             if (value->type() == ISExpr::ATOM) {
-                returnValue += ((Atom*)value)->name();
+                returnValue += value->toAtom()->name();
             }
             else {
                 // error?

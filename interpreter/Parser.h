@@ -27,11 +27,18 @@ class Parser
 
     NameToSExprMap* m_globalVariableMap;
 
-    Atom* getAtom( const char* name )
+    ISExpr* getAtom( const char* name )
     {
         if ( auto it = m_globalVariableMap->find( name ); it != m_globalVariableMap->end() )
         {
             return it->second;
+        }
+        
+        char* ptrEnd;
+        int64_t value = strtoll( name, &ptrEnd, 10 );
+        if ( *ptrEnd == char(0) ) {
+            auto* number = new IntNumber(value);
+            return number;
         }
         
         auto* atom = new Atom(name);
@@ -49,7 +56,7 @@ public:
     
     ISExpr* parse()
     {
-        auto token = m_scanner.parseToken(m_expression);
+        auto token = m_scanner.getNextToken(m_expression);
         switch (token.m_type)
         {
             case Scanner::LEFT_BRACKET:
@@ -84,7 +91,7 @@ public:
 
         for (;;)
         {
-            auto token = m_scanner.parseToken(m_expression);
+            auto token = m_scanner.getNextToken(m_expression);
 
             switch (token.m_type)
             {

@@ -22,7 +22,7 @@ public:
     };
 
 
-    Token parseToken(const std::string& expression) {
+    Token getNextToken(const std::string& expression) {
         int len = expression.length();
         while (pos < len) {
             char c = expression[pos];
