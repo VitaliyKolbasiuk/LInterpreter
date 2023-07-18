@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-46e91c0c767c12d9a380.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "Oleksii",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Oleksii::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Oleksii-Debug-a93d40b5ce76e4c714e7.json",
+					"name" : "Oleksii",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Oleksii_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Oleksii_autogen-Debug-58e2253ba8123df587fd.json",
+					"name" : "Oleksii_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Oleksii_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Oleksii_autogen_timestamp_deps-Debug-926e3103bf33bd42765a.json",
+					"name" : "Oleksii_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/38066/Desktop/cplusplus/LInterpreter/build-Oleksii-Desktop_Qt_6_5_1_MinGW_64_bit-Debug",
+		"source" : "C:/Users/38066/Desktop/cplusplus/LInterpreter/Oleksii"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}
