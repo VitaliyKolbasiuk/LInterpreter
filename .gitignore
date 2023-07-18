@@ -15,4 +15,4 @@
 x64
 _build
 
-*.txt.user
+CMakeLists.txt.user
