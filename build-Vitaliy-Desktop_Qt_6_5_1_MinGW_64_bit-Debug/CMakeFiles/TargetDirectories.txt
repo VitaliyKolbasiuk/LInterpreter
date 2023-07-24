@@ -1,0 +1,9 @@
+X:/C++/Projects C++/interpreter/LInterpreter/build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/Vitaliy.dir
+X:/C++/Projects C++/interpreter/LInterpreter/build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/edit_cache.dir
+X:/C++/Projects C++/interpreter/LInterpreter/build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/rebuild_cache.dir
+X:/C++/Projects C++/interpreter/LInterpreter/build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/list_install_components.dir
+X:/C++/Projects C++/interpreter/LInterpreter/build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/install.dir
+X:/C++/Projects C++/interpreter/LInterpreter/build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/install/local.dir
+X:/C++/Projects C++/interpreter/LInterpreter/build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/install/strip.dir
+X:/C++/Projects C++/interpreter/LInterpreter/build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/Vitaliy_autogen_timestamp_deps.dir
+X:/C++/Projects C++/interpreter/LInterpreter/build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/Vitaliy_autogen.dir
