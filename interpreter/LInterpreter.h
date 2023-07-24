@@ -8,8 +8,6 @@
 #include <functional>
 #include <forward_list>
 
-using BuiltInFunc = std::function< ISExpr* (List*) >;
-
 class LInterpreter {
 public:
     Atom*  m_nilAtom = new Atom("nil");
@@ -20,8 +18,7 @@ private:
     LInterpreter();
     void addPseudoTableFuncs();
 public:
-	std::map<std::string, BuiltInFunc>  m_builtInFuncMap;
-    std::map<std::string, List*>        m_userFuncMap;
+    BuiltinFuncMap m_builtInFuncMap;
     
     NameToSExprMap m_globalVariableMap;
 
@@ -31,7 +28,7 @@ public:
 	}
 
     ISExpr* eval(const std::string& lText) {
-        auto* expr = m_parser.parse( lText, m_globalVariableMap );
+        auto* expr = m_parser.parse( lText, m_globalVariableMap, m_builtInFuncMap );
         if ( expr == nullptr )
         {
             return nullptr;
@@ -50,6 +47,11 @@ public:
             {
                 return sExpr0->toAtom()->value();
             }
+            case ISExpr::DOUBLE:
+            case ISExpr::INT_NUMBER:
+            {
+                return sExpr0;
+            }
             case ISExpr::LIST:
             {
                 List* sExpr = sExpr0->toList();
@@ -59,21 +61,16 @@ public:
                 }
                 else {
                     auto* funcName = sExpr->m_car;
+                    if ( funcName->type() == ISExpr::BUILT_IN_FUNC )
+                    {
+                        return funcName->toBuiltinFunc()->func()( sExpr->m_cdr );
+                    }
+
                     if ( funcName->type() == ISExpr::ATOM )
                     {
                         //LOGVAR( funcName->m_atomName );
-
-                        if ( auto it =  m_builtInFuncMap.find( funcName->toAtom()->name() );
-                                  it != m_builtInFuncMap.end() )
-                        {
-                            // applay lambda function
-                            return it->second( sExpr->m_cdr );
-                        }
-                        else
-                        {
-                            //LOG( "function '" << ((Atom*)funcName)->name() << "' not defined" );
-                            return evalUserDefinedFunc( sExpr );
-                        }
+                        //LOG( "function '" << ((Atom*)funcName)->name() << "' not defined" );
+                        return evalUserDefinedFunc( sExpr );
                     }
                     else
                     {

@@ -15,6 +15,7 @@ public:
     { return std::strcmp(str1, str2) < 0; }
 };
 using NameToSExprMap = std::map<const char*, Atom*, ConstCharPtrCompare>;
+using BuiltinFuncMap = std::map<const char*, BuiltinFunc*, ConstCharPtrCompare>;
 
 
 //
@@ -26,10 +27,17 @@ class Parser
     std::string m_expression;
 
     NameToSExprMap* m_globalVariableMap;
+    BuiltinFuncMap* m_builtInFuncMap;
 
+private:
     ISExpr* getAtom( const char* name )
     {
         if ( auto it = m_globalVariableMap->find( name ); it != m_globalVariableMap->end() )
+        {
+            return it->second;
+        }
+        
+        if ( auto it = m_builtInFuncMap->find( name ); it != m_builtInFuncMap->end() )
         {
             return it->second;
         }
@@ -41,14 +49,26 @@ class Parser
             return number;
         }
         
+        {
+            double value = strtod( name, &ptrEnd );
+            if ( *ptrEnd == char(0) ) {
+                auto* number = new Double(value);
+                return number;
+            }
+        }
+        
         auto* atom = new Atom(name);
         (*m_globalVariableMap)[atom->name()] = atom;
         return atom;
     }
 
 public:
-    ISExpr* parse( const std::string& expression, NameToSExprMap& globalVariableMap ) {
+    ISExpr* parse( const std::string& expression,
+                  NameToSExprMap& globalVariableMap,
+                  BuiltinFuncMap& builtInFuncMap )
+    {
         m_globalVariableMap = &globalVariableMap;
+        m_builtInFuncMap = &builtInFuncMap;
         m_expression = expression;
         ISExpr* expr = parse();
         return expr;

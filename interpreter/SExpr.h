@@ -28,7 +28,10 @@
 
 class List;
 class Atom;
+class BuiltinFunc;
 class IntNumber;
+class Double;
+
 
 //----------
 // ISExpr
@@ -39,13 +42,12 @@ public:
     enum Type {
         LIST=0,
         BUILT_IN_FUNC,
-        USER_FUNC,
         ATOM,
-        INT_NUMBER,
         DOUBLE,
+        INT_NUMBER,
         STRING,
         WSTRING,
-        ARRAY
+        ARRAY,
     };
 
 protected:
@@ -55,6 +57,7 @@ protected:
 public:
     virtual Type type() const = 0;
     virtual ISExpr* print(  std::ostream& stream ) const = 0;
+    virtual ISExpr* eval() = 0;
 
     ISExpr* print(  const char* prefix ) const { std::cout << prefix; print(std::cout); };
 
@@ -76,6 +79,14 @@ public:
         return (Atom*) this;
     }
     
+    BuiltinFunc*  toBuiltinFunc() {
+        if ( type() != BUILT_IN_FUNC )
+        {
+            return nullptr;
+        }
+        return (BuiltinFunc*) this;
+    }
+    
     IntNumber*  toIntNumber() {
         if ( type() != INT_NUMBER )
         {
@@ -85,6 +96,25 @@ public:
         return (IntNumber*) this;
     }
     
+    Double*  toDouble() {
+        if ( type() != DOUBLE )
+        {
+            __asm { int 3 }
+            return nullptr;
+        }
+        return (Double*) this;
+    }
+    
+protected:
+    const char* copyString( const char* name )
+    {
+        auto len = std::strlen(name)+1;
+        char* string = new char[len];
+        std::memcpy( string, name, len );
+        return string;
+    }
+    
+
 };
 
 //------------------------
@@ -104,6 +134,8 @@ public:
 
     Type type() const override { return LIST; }
     
+    virtual ISExpr* eval() override { return this; } //TODO
+
     bool isEmptyList() { return m_car == nullptr && m_cdr == nullptr;}
 
     ISExpr* print(  const char* prefix ) const { std::cout << prefix; print(std::cout); };
@@ -138,20 +170,14 @@ class Atom : public ISExpr
     const char* m_name;
     ISExpr*     m_value = this;
 
-    const char* copyString( const char* name )
-    {
-        auto len = std::strlen(name)+1;
-        char* string = new char[len];
-        std::memcpy( string, name, len );
-        return string;
-    }
-    
 public:
     Atom( const char* name ) : m_name( copyString(name) ), m_value(this) {};
     Atom( const char* name, ISExpr* value ) : m_name( copyString(name) ), m_value(value) {};
     virtual ~Atom() { delete [] m_name; }
 
     Type type() const override { return ATOM; }
+
+    virtual ISExpr* eval() override { return m_value; }
 
     ISExpr* print( std::ostream& stream = std::cout ) const override
     {
@@ -162,6 +188,34 @@ public:
     ISExpr*     value() const { return m_value; }
     void        setValue( ISExpr* newValue ) { m_value = newValue; }
 };
+
+//------------------------
+// BuiltinFunc
+//------------------------
+using BuiltInLambda = std::function< ISExpr* (List*) >;
+
+class BuiltinFunc : public ISExpr
+{
+    const char* m_name;
+    BuiltInLambda m_lambdaFunc;
+    
+public:
+    BuiltinFunc( const char* name, BuiltInLambda lambdaFunc ) : m_name( copyString(name) ), m_lambdaFunc(lambdaFunc) {};
+    virtual ~BuiltinFunc() { delete [] m_name; }
+
+    Type type() const override { return BUILT_IN_FUNC; }
+
+    virtual ISExpr* eval() override { return this; }
+
+    ISExpr* print( std::ostream& stream = std::cout ) const override
+    {
+        stream << m_name;
+    }
+
+    const char* name() const { return m_name; }
+    BuiltInLambda func() const { return m_lambdaFunc; }
+};
+
 
 //------------------------
 // IntNumber
@@ -175,10 +229,37 @@ public:
     
     Type type() const override { return INT_NUMBER; }
 
+    virtual ISExpr* eval() override { return this; }
+
     ISExpr* print( std::ostream& stream = std::cout ) const override
     {
         stream << m_value;
     }
 
     int64_t& value() { return m_value; }
+};
+
+//------------------------
+// DoubleNumber
+//------------------------
+
+class Double: public ISExpr
+{
+    double m_value;
+public:
+    Double( double value ) : m_value(value) {}
+    
+    Type type() const override { return DOUBLE; }
+
+    virtual ISExpr* eval() override { return this; }
+
+    ISExpr* print( std::ostream& stream = std::cout ) const override
+    {
+        std::string str = std::to_string(m_value);
+        str.erase ( str.find_last_not_of('0') + 1, std::string::npos );
+        str.erase ( str.find_last_not_of('.') + 1, std::string::npos );
+        stream << str;
+    }
+
+    double& value() { return m_value; }
 };
