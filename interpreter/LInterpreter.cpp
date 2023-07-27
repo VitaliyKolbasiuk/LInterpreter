@@ -1,4 +1,5 @@
 #include "LInterpreter.h"
+#include <cassert>
 /*
  (rect (position 100 20) (size 20 30) (color 0xFFCC00) (fillcolor 0xFFFFFF) (text "Some textz"))
  (rect (position 100 20) (size 20 30) (color 0xFFCC00))
@@ -205,7 +206,7 @@ LInterpreter::LInterpreter() {
             default:
                 break;
         }
-        
+            return nullptr;
     });
 
 }

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include <csignal>
+#include <cstring>
+#include <functional>
 
 //---------------------------------------------------------------
 //
@@ -59,12 +62,12 @@ public:
     virtual ISExpr* print(  std::ostream& stream ) const = 0;
     virtual ISExpr* eval() = 0;
 
-    ISExpr* print(  const char* prefix ) const { std::cout << prefix; print(std::cout); };
+    ISExpr* print(  const char* prefix ) const { std::cout << prefix; print(std::cout); return nullptr;};
 
     List*   toList() {
         if ( type() != LIST )
         {
-            __asm { int 3 }
+            std::raise(SIGINT);
             return nullptr;
         }
         return (List*) this;
@@ -73,7 +76,7 @@ public:
     Atom*   toAtom() {
         if ( type() != ATOM )
         {
-            __asm { int 3 }
+            std::raise(SIGINT);
             return nullptr;
         }
         return (Atom*) this;
@@ -90,7 +93,7 @@ public:
     IntNumber*  toIntNumber() {
         if ( type() != INT_NUMBER )
         {
-            __asm { int 3 }
+            std::raise(SIGINT);
             return nullptr;
         }
         return (IntNumber*) this;
@@ -99,7 +102,7 @@ public:
     Double*  toDouble() {
         if ( type() != DOUBLE )
         {
-            __asm { int 3 }
+            std::raise(SIGINT);
             return nullptr;
         }
         return (Double*) this;
@@ -138,7 +141,7 @@ public:
 
     bool isEmptyList() { return m_car == nullptr && m_cdr == nullptr;}
 
-    ISExpr* print(  const char* prefix ) const { std::cout << prefix; print(std::cout); };
+    ISExpr* print(  const char* prefix ) const { std::cout << prefix; print(std::cout); return nullptr;};
 
     ISExpr* print( std::ostream& stream = std::cout ) const override
     {
@@ -159,6 +162,7 @@ public:
         }
 
         stream << " )";
+        return nullptr;
     }
 };
 
@@ -182,6 +186,7 @@ public:
     ISExpr* print( std::ostream& stream = std::cout ) const override
     {
         stream << m_name;
+        return nullptr;
     }
 
     const char* name() const { return m_name; }
@@ -210,6 +215,7 @@ public:
     ISExpr* print( std::ostream& stream = std::cout ) const override
     {
         stream << m_name;
+        return nullptr;
     }
 
     const char* name() const { return m_name; }
@@ -234,6 +240,7 @@ public:
     ISExpr* print( std::ostream& stream = std::cout ) const override
     {
         stream << m_value;
+        return nullptr;
     }
 
     int64_t& value() { return m_value; }
@@ -259,6 +266,7 @@ public:
         str.erase ( str.find_last_not_of('0') + 1, std::string::npos );
         str.erase ( str.find_last_not_of('.') + 1, std::string::npos );
         stream << str;
+        return nullptr;
     }
 
     double& value() { return m_value; }

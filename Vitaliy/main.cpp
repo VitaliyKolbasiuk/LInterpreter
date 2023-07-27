@@ -15,8 +15,8 @@ public:
     }
 private:
     double x = 0, y = 0;
-    double dx = 1;
-    double dy = 1;
+    double dx = 2;
+    double dy = 2;
     QTimer* timer;
 protected:
     void paintEvent(QPaintEvent* event) override{
@@ -40,6 +40,15 @@ protected:
         painter.drawEllipse(x, y, radius, radius);
     }
 };
+
+// ( gSetWindowSize 800 800 ) ( set dx 2 ) ( set dy 2 ) (set x 10) (set y 100)
+// ( defun aintEvent (widget) )
+//      ( widget setRenderHintAntialiasing true )
+//      ( set radius 10 )
+//      ( if ( OR (> (+ x dx) (- (widget with) radius) (< (+ x dx) 0))
+//              (set dx (- 0 dx)) )
+//      ...
+//      ( widget setBrush "black" )
 
 int main(int argc, char *argv[])
 {

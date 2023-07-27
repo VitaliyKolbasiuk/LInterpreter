@@ -102,6 +102,7 @@ public:
                 return nullptr;
             }
         }
+            return nullptr;
     }
     
     List* parseList()

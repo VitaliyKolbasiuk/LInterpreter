@@ -12,7 +12,7 @@ class LInterpreter {
 public:
     Atom*  m_nilAtom = new Atom("nil");
 
-private:
+protected:
     Parser  m_parser;
     
     LInterpreter();

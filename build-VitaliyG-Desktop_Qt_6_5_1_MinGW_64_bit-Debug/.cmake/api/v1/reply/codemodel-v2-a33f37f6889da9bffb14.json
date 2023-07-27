@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-e6f5eef8800f9f4c6c1d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "VitaliyG",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "VitaliyG::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-VitaliyG-Debug-e3a8a1ed3fc01497e33b.json",
+					"name" : "VitaliyG",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "VitaliyG_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-VitaliyG_autogen-Debug-538736e6158f45974dda.json",
+					"name" : "VitaliyG_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "VitaliyG_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-VitaliyG_autogen_timestamp_deps-Debug-fac9cfd928e0f498b6b0.json",
+					"name" : "VitaliyG_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "X:/C++/Projects C++/interpreter/LInterpreter/build-VitaliyG-Desktop_Qt_6_5_1_MinGW_64_bit-Debug",
+		"source" : "X:/C++/Projects C++/interpreter/LInterpreter/VitaliyG"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}
