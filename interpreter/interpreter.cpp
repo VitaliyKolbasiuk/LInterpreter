@@ -24,6 +24,22 @@
 
  */
 
+struct Date
+{
+    int mo, da, yr;
+public:
+    Date(int m, int d, int y)
+    {
+        mo = m; da = d; yr = y;
+    }
+};
+
+std::ostream& operator<<(std::ostream& os, const Date& dt)
+{
+    os << dt.mo << '/' << dt.da << '/' << dt.yr;
+    return os;
+}
+
 
 
 using namespace std;
@@ -48,5 +64,17 @@ int main() {
     std::cout << "\n\n# LInterpreter ended\n\n";
     
     
+    ISExpr* str = new Custom<Date>( new Date(12,31,2023) );
+    str->print("\n\nprint: ");
+
+    auto* s = to<Date>( str );
+    if ( s != nullptr )
+    {
+        std::cout << "\n\n#value:  " << *s->value();
+        std::cout << "\n\n# ";
+    }
+    
+    s->clear();
+
     return 0;
 }

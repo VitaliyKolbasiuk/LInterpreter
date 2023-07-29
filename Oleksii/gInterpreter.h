@@ -10,7 +10,8 @@
 #include <QVBoxLayout>
 #include <QTimer>
 
-class MainWidget: public QWidget{
+class MainWidget: public QWidget
+{
 public:
     MainWidget(QWidget *parent = nullptr) : QWidget(parent) {
         timer = new QTimer(this);
@@ -49,37 +50,20 @@ class gInterpreter:public LInterpreter
 {
     MainWindow* w;
 public:
-    MainWidget* widget;
-    QPainter* painter;
+
+    Custom<MainWidget>  widget;
+//    Atom*               widgetAtom;
+//    QPainter*           painter;
+
 public:
     gInterpreter();
+  
     static gInterpreter& getInstance() {
         static gInterpreter instance;
         return instance;
     }
+    
     int exec(int argc, char *argv[], std::string code);
-    void paintEvent(){
-        painter = new QPainter;
-        eval("( paintEvent 0 )");
-        /* TODO PLAN
-         eval("");
-//(( gSetWindowSize 800 800 ) ( set dx 2 ) ( set dy 2 ) (set x 10) (set y 100)\
-//                        ( defun paintEvent (painter) )\
-//                             ( painter setRenderHintAntialiasing true )\
-//                             ( set radius 10 )\
-//                            ( if ( OR (> (+ x dx) (- (painter with) radius) (< (+ x dx) 0))\
-//                                    (set dx (- 0 dx)) )\
-//                             ( painter setBrush \"black\" ))
-
-
-
-
-
-
-
-         */
-        delete painter;
-    }
 };
 
 #endif // GINTERPRETER_H

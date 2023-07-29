@@ -30,6 +30,8 @@ class Parser
     BuiltinFuncMap* m_builtInFuncMap;
 
 private:
+    friend class LInterpreter;
+    
     ISExpr* getAtom( const char* name )
     {
         if ( auto it = m_globalVariableMap->find( name ); it != m_globalVariableMap->end() )
@@ -63,6 +65,13 @@ private:
     }
 
 public:
+    void init( NameToSExprMap& globalVariableMap,
+                  BuiltinFuncMap& builtInFuncMap )
+    {
+        m_globalVariableMap = &globalVariableMap;
+        m_builtInFuncMap = &builtInFuncMap;
+    }
+    
     ISExpr* parse( const std::string& expression,
                   NameToSExprMap& globalVariableMap,
                   BuiltinFuncMap& builtInFuncMap )

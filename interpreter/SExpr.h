@@ -51,6 +51,7 @@ public:
         STRING,
         WSTRING,
         ARRAY,
+        CUSTOM
     };
 
 protected:
@@ -62,8 +63,10 @@ public:
     virtual ISExpr* print(  std::ostream& stream ) const = 0;
     virtual ISExpr* eval() = 0;
 
-    ISExpr* print(  const char* prefix ) const { std::cout << prefix; print(std::cout); return nullptr;};
+    ISExpr* print( const char* prefix ) const { std::cout << prefix; print(std::cout); return nullptr;};
 
+    ISExpr* toExpr() { return this; }
+    
     List*   toList() {
         if ( type() != LIST )
         {
@@ -271,3 +274,33 @@ public:
 
     double& value() { return m_value; }
 };
+
+//------------------------
+// Custom
+//------------------------
+
+template<class T>
+class Custom: public ISExpr
+{
+    T* m_value = nullptr;
+
+public:
+    Custom( T* value = nullptr ) : m_value(value) {}
+    
+    Type type() const override { return CUSTOM; }
+
+    virtual ISExpr* eval() override { return this; }
+
+    ISExpr* print( std::ostream& stream = std::cout ) const override
+    {
+        stream << "Custom";
+        return nullptr;
+    }
+
+    T* value() { return m_value; }
+    
+    void clear() { delete m_value; m_value = nullptr; }
+};
+
+template<class T>
+inline Custom<T>* to( ISExpr* expr ) { return dynamic_cast<Custom<T>*>(expr); }

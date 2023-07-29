@@ -11,15 +11,24 @@
 class LInterpreter {
 public:
     Atom*  m_nilAtom = new Atom("nil");
-    bool isNil(Atom* at){
-        const char* cmpr = at->name();
-        return !strcmp(cmpr, "nil");
+    
+    bool isNil( ISExpr* at)
+    {
+        if ( at == nullptr || at == m_nilAtom )
+        {
+            return true;
+        }
+        return false;
     }
 protected:
     Parser  m_parser;
     
     LInterpreter();
     void addPseudoTableFuncs();
+    
+public:
+    ISExpr* getAtom( const char* name ) { return m_parser.getAtom(name); }
+
 public:
     BuiltinFuncMap m_builtInFuncMap;
     
@@ -91,9 +100,11 @@ public:
     {
         //sExpr->print("sExpr:");
         auto* funcName = sExpr->m_car->toAtom();
+        funcName->toExpr()->print("\nfuncName:");
         auto* parameters = sExpr->m_cdr;
         //parameters->print("\nparameters:");
 
+        //funcName->value()->print("\nfuncName:");
         auto* funcDefinition = funcName->value()->toList();
         //funcDefinition->print("\nfuncDefinition:");
         
@@ -108,10 +119,13 @@ public:
         auto* argList = funcDefinition->m_car->toList();
         //argList->print("\nargList:");
 
-        auto* funcBody = funcDefinition->m_cdr->m_car->toList();
-        //funcBody->print("\nfuncBody:");
+        //auto* funcBody = funcDefinition->m_cdr->m_car->toList();
+        auto* funcBody = funcDefinition->m_cdr;
+        funcBody->print("\nfuncBody:");
         
-        // copy
+        //
+        //
+        //copy parameters values
         struct AtomValue { Atom* atom; ISExpr* value; };
         std::forward_list<AtomValue> savedList;
         
@@ -136,9 +150,20 @@ public:
 //            it->m_car->m_atomValue->print("\nafter save:");
         }
 
-        auto retValue = eval( funcBody );
+        //
+        // Evaluate !!!
+        //
+        ISExpr* retValue = nullptr;
+        for( auto* it = funcBody; (it != nullptr); it = it->m_cdr )
+        {
+            auto* expr = it->m_car;
+            expr->print( "\nexpr: " );
+            retValue = eval( expr );
+        }
 
+        //
         // restore atom values
+        //
         while( !savedList.empty() )
         {
             auto& front = savedList.front();
