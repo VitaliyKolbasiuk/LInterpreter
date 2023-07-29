@@ -20,3 +20,5 @@ build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug
 x64/Debug
 
 CMakeLists.txt.user
+*.json
+*.idx

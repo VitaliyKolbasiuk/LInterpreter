@@ -188,7 +188,7 @@ public:
         stream << m_name;
         return nullptr;
     }
-
+//    ISExpr*     retnil() const { return LInterpreter::getInstance().m_nilAtom;}
     const char* name() const { return m_name; }
     ISExpr*     value() const { return m_value; }
     void        setValue( ISExpr* newValue ) { m_value = newValue; }

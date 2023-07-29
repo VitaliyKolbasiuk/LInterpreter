@@ -102,6 +102,9 @@ LInterpreter::LInterpreter() {
     // (set x) -> nil
     // (set x 1 2 3) -> ?
     // (set x '(1 2 3)) -> (1 2 3)
+    // (set x (+ a b c )) -> atom("abc")
+    // (+ a (b c) d) -> atom("ad")
+
     m_builtInFuncMap["set"] = new BuiltinFunc( "set", [](List* expr) -> ISExpr*
     {
         if ( expr == nullptr )
@@ -115,20 +118,120 @@ LInterpreter::LInterpreter() {
         return value;
     });
 
-    // (set x (+ a b c )) -> atom("abc")
-    // (+ a (b c) d) -> atom("ad")
-    m_builtInFuncMap["+"] = new BuiltinFunc( "+", [](List* expr) -> ISExpr*
+    m_builtInFuncMap["-"] = new BuiltinFunc( "-", [](List* expr) -> ISExpr*
     {
         ISExpr* result = nullptr;
-
         ISExpr::Type returnType = ISExpr::INT_NUMBER;
         for (auto* it = expr; it != nullptr; it = it->m_cdr)
         {
             auto* value = LInterpreter::getInstance().eval( it->m_car );
+            if ( value->type() < returnType )
+            {
+                returnType = value->type();
+            }
+        }
 
-//            it->toList()->m_car->print("\n? ");
-//            LOG( "\ntype: " << it->toList()->m_car->type());
-            
+        switch (returnType)
+        {
+        case ISExpr::DOUBLE:
+        {
+            auto* value = LInterpreter::getInstance().eval( expr->m_car );
+            double returnValue = value->toDouble()->value();
+            for (auto* it = expr->m_cdr; it != nullptr; it = it->m_cdr)
+            {
+                auto* value = LInterpreter::getInstance().eval( it->m_car );
+                if ( value->type() == ISExpr::DOUBLE ) {
+                    returnValue -= value->toDouble()->value();
+                }
+                else if ( value->type() == ISExpr::INT_NUMBER ) {
+                    returnValue -= value->toIntNumber()->value();
+                }
+            }
+            return new Double( returnValue );
+        }
+
+        case ISExpr::INT_NUMBER:
+        {
+            auto* value = LInterpreter::getInstance().eval( expr->m_car );
+            int64_t returnValue = value->toIntNumber()->value();
+            for (auto* it = expr->m_cdr; it != nullptr; it = it->m_cdr)
+            {
+                auto* value = LInterpreter::getInstance().eval( it->m_car );
+                returnValue -= value->toIntNumber()->value();
+            }
+            return new IntNumber( returnValue );
+        }
+        default:
+            break;
+        }
+        return nullptr;
+    });
+
+    m_builtInFuncMap["OR"] = new BuiltinFunc( "OR", [](List* expr) -> ISExpr*
+    {
+        auto* value = LInterpreter::getInstance().eval( expr->m_car );
+        auto* secondValue = LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+        bool first = LInterpreter::getInstance().isNil(value->toAtom());
+        bool second = LInterpreter::getInstance().isNil(secondValue->toAtom());
+        return !first || !second ?  new Atom ("true") : LInterpreter::getInstance().m_nilAtom;
+    });
+
+    m_builtInFuncMap["if"] = new BuiltinFunc( "if", [](List* expr) -> ISExpr*
+    {
+        auto* x = LInterpreter::getInstance().eval(expr->m_car);
+        bool istrue = !LInterpreter::getInstance().isNil(x->toAtom());
+        if(istrue){
+            LInterpreter::getInstance().eval(expr->m_cdr->m_car);
+        }
+    });
+
+    m_builtInFuncMap[">"] = new BuiltinFunc( ">", [](List* expr) -> ISExpr*
+    {
+        auto* value = LInterpreter::getInstance().eval( expr->m_car );
+        if(value->type() == ISExpr::DOUBLE){
+            double first = value->toDouble()->value();
+            value = LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+            double second = value->toDouble()->value();
+            if(second > first) return LInterpreter::getInstance().m_nilAtom;
+            else return new Atom("true");
+        }
+        else if(value->type() == ISExpr::INT_NUMBER){
+            int64_t first = value->toIntNumber()->value();
+            value = LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+            int64_t second = value->toIntNumber()->value();
+            if(second > first) return LInterpreter::getInstance().m_nilAtom;
+            else return new Atom("true");
+        }
+        else return LInterpreter::getInstance().m_nilAtom;
+    });
+
+    m_builtInFuncMap["<"] = new BuiltinFunc( "<", [](List* expr) -> ISExpr*
+ {
+    auto* value = LInterpreter::getInstance().eval( expr->m_car );
+    if(value->type() == ISExpr::DOUBLE){
+        double first = value->toDouble()->value();
+        value = LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+        double second = value->toDouble()->value();
+        if(second < first) return LInterpreter::getInstance().m_nilAtom;
+        else return new Atom("true");
+    }
+    else if(value->type() == ISExpr::INT_NUMBER){
+        int64_t first = value->toIntNumber()->value();
+        value = LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+        int64_t second = value->toIntNumber()->value();
+        if(second < first) return LInterpreter::getInstance().m_nilAtom;
+        else return new Atom("true");
+        }
+    else return LInterpreter::getInstance().m_nilAtom;
+ });
+
+    m_builtInFuncMap["+"] = new BuiltinFunc( "+", [](List* expr) -> ISExpr*
+    {
+        ISExpr* result = nullptr;
+        ISExpr::Type returnType = ISExpr::INT_NUMBER;
+        for (auto* it = expr; it != nullptr; it = it->m_cdr)
+        {
+            auto* value = LInterpreter::getInstance().eval( it->m_car );
             if ( value->type() < returnType )
             {
                 returnType = value->type();
@@ -141,13 +244,9 @@ LInterpreter::LInterpreter() {
             case ISExpr::ATOM:
             {
                 std::string returnValue;
-
-                //expr->print("+ arguments: ");
                 for (auto* it = expr; it != nullptr; it = it->m_cdr)
                 {
-                    //it->m_car->print("\nit->m_car: ");
                     auto* value = LInterpreter::getInstance().eval( it->m_car );
-                    //value->print("\nvalue: ");
                     if (value->type() == ISExpr::ATOM) {
                         returnValue += value->toAtom()->name();
                     }

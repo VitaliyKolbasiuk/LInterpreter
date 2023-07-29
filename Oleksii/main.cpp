@@ -1,48 +1,29 @@
-//#include "mainwindow.h"
-
-//#include <QApplication>
-
-//int main(int argc, char *argv[])
-//{
-//    QApplication a(argc, argv);
-//    MainWindow w;
-//    w.show();
-//    return a.exec();
-//}
-
+#include "mainwindow.h"
+#include "gInterpreter.h"
 
 #include <QApplication>
-#include <QGraphicsScene>
-#include <QGraphicsRectItem>
-#include <QGraphicsView>
-
-/*
-Prereqs:
--basic knowledge of c++ (pointers and memory management)
--VERY basic knowledge of Qt (widgets)
-Tutorial Topics:
--QGraphicsScene
--QGraphicsItem (QGraphicsRectItem)
--QGraphicsView
-*/
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+//    std::string code = "(( gSetWindowSize 800 800 ) ( set dx 2 ) ( set dy 2 ) (set x 10) (set y 100)\
+//                        ( defun aintEvent (widget) )\
+//                             ( widget setRenderHintAntialiasing true )\
+//                             ( set radius 10 )\
+//                            ( if ( OR (> (+ x dx) (- (widget with) radius) (< (+ x dx) 0))\
+//                                    (set dx (- 0 dx)) )\
+//                             ( widget setBrush \"black\" ))";
+//    std::string code = "( gSetWindowSize 400 400 ) (print(- -7.5 5))";
+//    auto& interpreter = gInterpreter::getInstance();
+//    return interpreter.exec(argc, argv, code);
 
-    // create a scene
-    QGraphicsScene * scene = new QGraphicsScene();
 
-    // create an item to put into the scene
-    QGraphicsRectItem * rect = new QGraphicsRectItem();
-    rect->setRect(0,0,100,100);
 
-    // add the item to the scene
-    scene->addItem(rect);
-
-    // add a view to visualize the scene
-    QGraphicsView * view = new QGraphicsView(scene);
-
-    view->show();
-    return a.exec();
+//    std::string code = "(print(- -7.5 5))";
+//    std::string code = "(print(OR ( < 5 10) (< 4 10) )            )";
+    std::string code = "(if ( OR ( > 5 10) (< 4 10) )  (print(+ 10 10)) )";
+//std::string code = "(print(13123412412))";
+    LInterpreter& lInterpreter = LInterpreter::getInstance();
+    while( lInterpreter.eval(code) != nullptr ) {
+    }
+    return 0;
 }

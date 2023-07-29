@@ -11,7 +11,10 @@
 class LInterpreter {
 public:
     Atom*  m_nilAtom = new Atom("nil");
-
+    bool isNil(Atom* at){
+        const char* cmpr = at->name();
+        return !strcmp(cmpr, "nil");
+    }
 protected:
     Parser  m_parser;
     
@@ -80,7 +83,7 @@ public:
                 }
                 break;
             }
-		}
+        }
         return m_nilAtom;
 	}
     
