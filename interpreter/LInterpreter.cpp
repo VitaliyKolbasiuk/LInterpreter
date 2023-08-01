@@ -114,7 +114,7 @@ LInterpreter::LInterpreter() {
         }
         auto* var= expr->m_car->toAtom();
         auto* value = (expr->m_cdr==nullptr) ? LInterpreter::getInstance().m_nilAtom
-                                                 : LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+                                             : LInterpreter::getInstance().eval( expr->m_cdr->m_car );
         var->setValue( value );
         return value;
     });

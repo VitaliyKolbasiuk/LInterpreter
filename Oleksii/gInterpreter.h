@@ -52,8 +52,6 @@ class gInterpreter:public LInterpreter
 public:
 
     Custom<MainWidget>  widget;
-//    Atom*               widgetAtom;
-//    QPainter*           painter;
 
 public:
     gInterpreter();

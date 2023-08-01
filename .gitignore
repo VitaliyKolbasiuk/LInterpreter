@@ -19,7 +19,7 @@ build-Oleksii-Desktop_Qt_6_5_1_MinGW_64_bit-Debug
 build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug
 x64/Debug
 Vitaliy
-
+build 
 CMakeLists.txt.user
 *.json
 *.idx

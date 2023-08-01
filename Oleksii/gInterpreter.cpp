@@ -80,6 +80,36 @@ gInterpreter::gInterpreter()
         qPainter->drawEllipse( x, y, xRadius, yRadius );
     });
 
+    m_builtInFuncMap["gDrawRect"] = new BuiltinFunc( "gDrawRect", [](List* expr) -> ISExpr*
+    {
+        auto* painter = to<QPainter>( expr->m_car->toAtom()->value() );
+        auto* qPainter = painter->value();
+        expr = expr->m_cdr;
+
+        int x = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        expr = expr->m_cdr;
+
+        int y = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        expr = expr->m_cdr;
+
+        int width = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        expr = expr->m_cdr;
+
+        int height = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        expr = expr->m_cdr;
+
+        qPainter->drawRect(x , y, width, height);
+    });
+
+    m_builtInFuncMap["gSetBrush"] = new BuiltinFunc( "gSetBrush", [](List* expr) -> ISExpr*
+    {
+        auto* painter = to<QPainter>( expr->m_car->toAtom()->value() );
+        auto* qPainter = painter->value();
+        expr = expr->m_cdr;
+        QColor color (expr->m_car->toAtom()->name());
+        qPainter->setBrush(color);
+    });
+
 }
 
 int gInterpreter::exec(int argc, char* argv[], std::string code){
@@ -87,10 +117,9 @@ int gInterpreter::exec(int argc, char* argv[], std::string code){
     w = new MainWindow;
 
     widget = Custom<MainWidget>( new MainWidget );
-//    widgetAtom = getAtom( "MainWidget" );
-//    widgetAtom.setValue( &widget );
-    
-    eval(code);
+
+    while( eval(code) != nullptr ) {
+    }
 
     w->centralWidget()->setLayout(new QVBoxLayout);
     w->centralWidget()->layout()->addWidget( widget.value() );
