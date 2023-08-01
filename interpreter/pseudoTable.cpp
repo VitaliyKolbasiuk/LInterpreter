@@ -4,8 +4,8 @@ void LInterpreter::addPseudoTableFuncs() {
 
     m_builtInFuncMap["printRect"] = new BuiltinFunc( "printRect", [](List* expr) -> ISExpr* {
         List* parameterList = expr->m_car->toList();
-        int height = parameterList->m_car->toIntNumber()->value();
-        int width = parameterList->m_cdr->m_car->toIntNumber()->value();
+        int height = parameterList->m_car->toIntNumber()->intValue();
+        int width = parameterList->m_cdr->m_car->toIntNumber()->intValue();
 
         std::string answer = "";
         for (int j = 0; j < height; ++j) {

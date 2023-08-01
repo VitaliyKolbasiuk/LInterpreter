@@ -7,10 +7,12 @@
 #include <map>
 #include <functional>
 #include <forward_list>
+#include <fstream>
+#include <sstream>
 
 class LInterpreter {
 public:
-    Atom*  m_nilAtom = new Atom("nil");
+    ISExpr*  m_nilAtom = new Atom("nil");
     
     bool isNil( ISExpr* at)
     {
@@ -39,6 +41,23 @@ public:
 		return instance;
 	}
 
+    ISExpr* evalFile( const std::string& fileName )
+    {
+        std::ifstream fStream( fileName.c_str() );
+        std::string code;
+        if ( fStream )
+        {
+           std::ostringstream ss;
+           ss << fStream.rdbuf(); // reading data
+           code = ss.str();
+        }
+        else
+        {
+            LOG_ERR( "cannot open to read file: " << fileName );
+        }
+        return eval( code );
+    }
+    
     ISExpr* eval(const std::string& lText) {
         auto* expr = m_parser.parse( lText, m_globalVariableMap, m_builtInFuncMap );
         if ( expr == nullptr )
@@ -80,7 +99,7 @@ public:
 
                     if ( funcName->type() == ISExpr::ATOM )
                     {
-                        //LOGVAR( funcName->m_atomName );
+                        //LOG_VAR( funcName->m_atomName );
                         //LOG( "function '" << ((Atom*)funcName)->name() << "' not defined" );
                         return evalUserDefinedFunc( sExpr );
                     }

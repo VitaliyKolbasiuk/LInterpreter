@@ -43,8 +43,8 @@ gInterpreter::gInterpreter()
             LOG_ERR("gSetWindowSize: invalid 2-d parametr type");
             return nullptr;
         }
-        int w = width->toIntNumber()->value();
-        int h = height->toIntNumber()->value();
+        int w = width->toIntNumber()->intValue();
+        int h = height->toIntNumber()->intValue();
         gInterpreter::getInstance().w->resize(w, h);
         return nullptr;
     });
@@ -65,16 +65,16 @@ gInterpreter::gInterpreter()
         auto* qPainter = painter->value();
         expr = expr->m_cdr;
         
-        int x = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        int x = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
-        int y = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        int y = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
-        int xRadius = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        int xRadius = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
-        int yRadius = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        int yRadius = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
         qPainter->drawEllipse( x, y, xRadius, yRadius );
@@ -86,16 +86,16 @@ gInterpreter::gInterpreter()
         auto* qPainter = painter->value();
         expr = expr->m_cdr;
 
-        int x = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        int x = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
-        int y = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        int y = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
-        int width = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        int width = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
-        int height = gInterpreter::getInstance().eval( expr->m_car )->toIntNumber()->value();
+        int height = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
         qPainter->drawRect(x , y, width, height);
@@ -106,7 +106,8 @@ gInterpreter::gInterpreter()
         auto* painter = to<QPainter>( expr->m_car->toAtom()->value() );
         auto* qPainter = painter->value();
         expr = expr->m_cdr;
-        QColor color (expr->m_car->toAtom()->name());
+        LOG_VAR( "color: " << expr->m_car->toAtom()->name() )
+        QColor color( expr->m_car->toAtom()->name() );
         qPainter->setBrush(color);
     });
 
@@ -119,6 +120,21 @@ int gInterpreter::exec(int argc, char* argv[], std::string code){
     widget = Custom<MainWidget>( new MainWidget );
 
     while( eval(code) != nullptr ) {
+    }
+
+    w->centralWidget()->setLayout(new QVBoxLayout);
+    w->centralWidget()->layout()->addWidget( widget.value() );
+    w->show();
+    return a.exec();
+}
+
+int gInterpreter::execFile(int argc, char* argv[], std::string fileName ){
+    QApplication a(argc, argv);
+    w = new MainWindow;
+
+    widget = Custom<MainWidget>( new MainWidget );
+
+    while( evalFile(fileName) != nullptr ) {
     }
 
     w->centralWidget()->setLayout(new QVBoxLayout);

@@ -16,7 +16,7 @@ public:
     MainWidget(QWidget *parent = nullptr) : QWidget(parent) {
         timer = new QTimer(this);
         connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWidget::update));
-        timer->start(10);
+        timer->start(1);
     }
 private:
     double x = 0, y = 0;
@@ -24,7 +24,17 @@ private:
     double dy = 2;
     QTimer* timer;
 protected:
-    void paintEvent(QPaintEvent* event); /*override{
+    void mouseMoveEvent( QMouseEvent* ) override
+    {
+        
+    }
+    
+    void mousePressEvent( QMouseEvent* ) override
+    {
+        
+    }
+    
+    void paintEvent(QPaintEvent* event) override; /*{
         Q_UNUSED(event);
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing, true);
@@ -61,7 +71,8 @@ public:
         return instance;
     }
     
-    int exec(int argc, char *argv[], std::string code);
+    int exec(int argc, char *argv[], std::string code );
+    int execFile(int argc, char *argv[], std::string fileName );
 };
 
 #endif // GINTERPRETER_H

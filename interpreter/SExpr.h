@@ -32,6 +32,7 @@
 class List;
 class Atom;
 class BuiltinFunc;
+class NumberBase;
 class IntNumber;
 class Double;
 
@@ -47,6 +48,7 @@ public:
         BUILT_IN_FUNC,
         ATOM,
         DOUBLE,
+        NUMBER_BASE,
         INT_NUMBER,
         STRING,
         WSTRING,
@@ -91,6 +93,15 @@ public:
             return nullptr;
         }
         return (BuiltinFunc*) this;
+    }
+    
+    NumberBase*  toNumberBase() {
+        if ( type() != INT_NUMBER && type() != DOUBLE )
+        {
+            std::raise(SIGINT);
+            return nullptr;
+        }
+        return (NumberBase*) this;
     }
     
     IntNumber*  toIntNumber() {
@@ -227,14 +238,46 @@ public:
 
 
 //------------------------
+// NumberBase
+//------------------------
+
+class NumberBase: public ISExpr
+{
+protected:
+    union
+    {
+        int64_t m_intValue;
+        
+        // !!! reserved DoubleNumber !!!
+        double  m_doubleValue;
+    };
+
+public:
+    
+    //Type type() const override { return NUMBER_BASE; }
+
+    virtual ISExpr* eval() override { return this; }
+
+    ISExpr* print( std::ostream& stream = std::cout ) const override
+    {
+        stream << "NUMBER_BASE";
+        return nullptr;
+    }
+
+    virtual int64_t intValue() = 0;
+    virtual int64_t doubleValue() = 0;
+};
+
+
+//------------------------
 // IntNumber
 //------------------------
 
-class IntNumber: public ISExpr
+class IntNumber: public NumberBase
 {
-    int64_t m_value;
+protected:
 public:
-    IntNumber( int64_t value ) : m_value(value) {}
+    IntNumber( int64_t value ) { m_intValue = value; }
     
     Type type() const override { return INT_NUMBER; }
 
@@ -242,22 +285,22 @@ public:
 
     ISExpr* print( std::ostream& stream = std::cout ) const override
     {
-        stream << m_value;
+        stream << m_intValue;
         return nullptr;
     }
 
-    int64_t& value() { return m_value; }
+    virtual int64_t intValue() override { return m_intValue; }
+    virtual int64_t doubleValue() override { return m_intValue; }
 };
 
 //------------------------
 // DoubleNumber
 //------------------------
 
-class Double: public ISExpr
+class Double: public NumberBase
 {
-    double m_value;
 public:
-    Double( double value ) : m_value(value) {}
+    Double( double value ) { m_doubleValue = value; }
     
     Type type() const override { return DOUBLE; }
 
@@ -265,14 +308,15 @@ public:
 
     ISExpr* print( std::ostream& stream = std::cout ) const override
     {
-        std::string str = std::to_string(m_value);
+        std::string str = std::to_string(m_doubleValue);
         str.erase ( str.find_last_not_of('0') + 1, std::string::npos );
         str.erase ( str.find_last_not_of('.') + 1, std::string::npos );
         stream << str;
         return nullptr;
     }
 
-    double& value() { return m_value; }
+    virtual int64_t intValue() override { return m_doubleValue; }
+    virtual int64_t doubleValue() override { return m_doubleValue; }
 };
 
 //------------------------

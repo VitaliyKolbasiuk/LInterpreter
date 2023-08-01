@@ -152,7 +152,7 @@ public:
                 }
                 case Scanner::ATOM:
                 {
-                    //LOGVAR( token.m_atom );
+                    //LOG_VAR( token.m_atom );
                     
                     auto* atom = getAtom( token.m_atom.c_str() );
                     if ( result->m_car == nullptr )
