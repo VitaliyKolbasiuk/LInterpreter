@@ -24,16 +24,10 @@ private:
     double dy = 2;
     QTimer* timer;
 protected:
-    void mouseMoveEvent( QMouseEvent* ) override
-    {
-        
-    }
-    
-    void mousePressEvent( QMouseEvent* ) override
-    {
-        
-    }
-    
+    void mouseMoveEvent( QMouseEvent* ) override;
+    void mousePressEvent( QMouseEvent* ) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
+
     void paintEvent(QPaintEvent* event) override; /*{
         Q_UNUSED(event);
         QPainter painter(this);
@@ -59,6 +53,12 @@ protected:
 class gInterpreter:public LInterpreter
 {
     MainWindow* w;
+
+public:
+    Atom* m_paintEventAtom;
+    Atom* m_mousePressEventAtom;
+    Atom* m_mouseMoveEventAtom;
+    Atom* m_mouseReleaseEventAtom;
 public:
 
     Custom<MainWidget>  widget;

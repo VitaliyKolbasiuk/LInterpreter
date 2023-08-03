@@ -29,7 +29,10 @@ protected:
     void addPseudoTableFuncs();
     
 public:
-    ISExpr* getAtom( const char* name ) { return m_parser.getAtom(name); }
+    Atom* getAtom( const char* name )
+    {
+        return m_parser.getAtom(name)->toAtom();
+    }
 
 public:
     BuiltinFuncMap m_builtInFuncMap;
@@ -65,7 +68,7 @@ public:
             return nullptr;
         }
         std::cout << std::endl << std::endl;
-        expr->print("\n# evaluation of: ");
+        expr->print0("\n# evaluation of: ");
         std::cout << std::endl;
         return eval( expr );
 	}
@@ -105,7 +108,7 @@ public:
                     }
                     else
                     {
-                        funcName->print("error: ");
+                        funcName->print0("error: ");
                         LOG("must be a function name!");
                     }
                 }
@@ -119,11 +122,18 @@ public:
     {
         //sExpr->print("sExpr:");
         auto* funcName = sExpr->m_car->toAtom();
-        funcName->toExpr()->print("\nfuncName:");
+        funcName->toExpr()->print0("\nfuncName:");
         auto* parameters = sExpr->m_cdr;
-        //parameters->print("\nparameters:");
+        if ( parameters == nullptr )
+        {
+            LOG( "parameters == nullptr" )
+        }
+        else
+        {
+            parameters->print("\nparameters:");
+        }
 
-        //funcName->value()->print("\nfuncName:");
+        funcName->value()->print0("\nvalue:");
         auto* funcDefinition = funcName->value()->toList();
         //funcDefinition->print("\nfuncDefinition:");
         
@@ -136,11 +146,18 @@ public:
         }
 
         auto* argList = funcDefinition->m_car->toList();
-        //argList->print("\nargList:");
+        argList->print("\nargList:");
 
         //auto* funcBody = funcDefinition->m_cdr->m_car->toList();
         auto* funcBody = funcDefinition->m_cdr;
-        funcBody->print("\nfuncBody:");
+        if ( funcBody == nullptr )
+        {
+            LOG( "funcBody == nullptr" );
+        }
+        else
+        {
+            funcBody->print("\nfuncBody:");
+        }
         
         //
         //
@@ -149,26 +166,29 @@ public:
         std::forward_list<AtomValue> savedList;
         
         auto* parameterIt = parameters;
-        for( auto* it = argList; (it != nullptr); it = it->m_cdr )
+        if ( argList->m_car != nullptr )
         {
-//            it->m_car->m_atomValue->print("\nbefore save:");
+            for( auto* it = argList; (it != nullptr); it = it->m_cdr )
+            {
+    //            it->m_car->m_atomValue->print("\nbefore save:");
 
-            savedList.push_front( AtomValue{ it->m_car->toAtom(), it->m_car->toAtom()->value() } );
-            
-            if ( parameterIt != nullptr )
-            {
-                // substitute/replace argumement value by parameters
-                //parameterIt->m_car->print("\n");
-                it->m_car->toAtom()->setValue( parameterIt->m_car );
-                parameterIt = parameterIt->m_cdr;
+                savedList.push_front( AtomValue{ it->m_car->toAtom(), it->m_car->toAtom()->value() } );
+                
+                if ( parameterIt != nullptr )
+                {
+                    // substitute/replace argumement value by parameters
+                    //parameterIt->m_car->print("\n");
+                    it->m_car->toAtom()->setValue( parameterIt->m_car );
+                    parameterIt = parameterIt->m_cdr;
+                }
+                else
+                {
+                    it->m_car->toAtom()->setValue( m_nilAtom );
+                }
+    //            it->m_car->m_atomValue->print("\nafter save:");
             }
-            else
-            {
-                it->m_car->toAtom()->setValue( m_nilAtom );
-            }
-//            it->m_car->m_atomValue->print("\nafter save:");
         }
-
+        
         //
         // Evaluate !!!
         //
@@ -176,7 +196,7 @@ public:
         for( auto* it = funcBody; (it != nullptr); it = it->m_cdr )
         {
             auto* expr = it->m_car;
-            expr->print( "\nexpr: " );
+            expr->print0( "\nexpr: " );
             retValue = eval( expr );
         }
 

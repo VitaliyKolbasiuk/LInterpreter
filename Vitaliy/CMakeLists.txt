@@ -9,6 +9,19 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if (APPLE)
+    #set(CMAKE_PREFIX_PATH "~/Qt/6.2.4/macos")
+    set(CMAKE_PREFIX_PATH "~/Qt/6.4.0/macos")
+    set(BOOST_INCLUDE_DIR "/usr/local/include")
+    set(BOOST_LIB_DIR "/usr/local/lib")
+    set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
+    set(OPENSSL_LIBRARIES "/usr/local/opt/openssl/lib")
+    
+    # for -lcrypto (I do not know who uses it!)
+    link_directories(/usr/local/opt/openssl/lib)
+endif()
+
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 

@@ -8,9 +8,21 @@
 
 int main(int argc, char *argv[])
 {
+//    auto* i  = new IntNumber(11);
+//    auto* ii = new IntNumber(11);
+//    ii->setDoubleValue(12);
+//    auto* d  = new Double(12);
+//
+//    new(ii) Atom("atom");
+//    ii->print0("ii:");
+//
+//    LOG( "\n::: " << i->type() << " " << ii->type() << " " << d->type() );
+//    return;
+
     #define STRING(x) x
     #define XSTRING(x) STRING(x)
-    std::string testFileName = std::string(XSTRING(PROJECT_DIR)) + "/../test.l";
+//    std::string testFileName = std::string(XSTRING(PROJECT_DIR)) + "/../test.l";
+    std::string testFileName = std::string(XSTRING(PROJECT_DIR)) + "/test.l";
     //LOG( testFileName );
 
     auto& interpreter = gInterpreter::getInstance();
@@ -20,7 +32,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        LOG_ERR( "test file does not exist" );
+        LOG_ERR( "test file does not exist:" << testFileName );
         exit(1);
     }
 

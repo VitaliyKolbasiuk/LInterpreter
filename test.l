@@ -10,17 +10,21 @@
 (set height 600)
 (set dx 2)
 (set dy 2)
-(set radius 30)\
+(set radius 30)
+(set mousePressed nil)
 
-(defun mouseMoveEvent (mouseEvent)
-     (if (xMousePos)
-        (set 1playerX (+ 1playerX (- xMousePos (getMouseX mouseEvent) ))))
-     (set xMousePos (getMouseX mouseEvent))
- 
-     (if (yMousePos)
-        (set 1playerY (+ 1playerY (- yMousePos (getMouseY mouseEvent) ))))
-    (set yMousePos (getMouseY mouseEvent))
-)
+ (defun mousePressEvent ()
+    (set mousePressed T)
+ )
+
+ (defun mouseReleaseEvent ()
+  (set mousePressed nil)
+ )
+
+ (defun mouseMoveEvent (x y)
+      (set 1playerX x)
+      (set 1playerY y)
+ )
 
 (defun paintEvent (painter)
     (gSetWindowSize width height)
@@ -35,5 +39,6 @@
     (gDrawRect painter 0 0 width height)
     (gSetBrush painter blue)
     (gDrawEllipse painter x y radius radius)
-    (gDrawEllipse painter 100 100 30 100 )
+    
+    (gDrawEllipse painter 1playerX 1playerY 30 100 )
 )

@@ -62,10 +62,10 @@ protected:
 
 public:
     virtual Type type() const = 0;
-    virtual ISExpr* print(  std::ostream& stream ) const = 0;
+    virtual ISExpr* print( std::ostream& stream ) const = 0;
     virtual ISExpr* eval() = 0;
 
-    ISExpr* print( const char* prefix ) const { std::cout << prefix; print(std::cout); return nullptr;};
+    virtual ISExpr* print0( const char* prefix ) const { std::cout << prefix; print(std::cout); return nullptr;};
 
     ISExpr* toExpr() { return this; }
     
@@ -160,6 +160,12 @@ public:
     ISExpr* print( std::ostream& stream = std::cout ) const override
     {
         stream << "( ";
+        if ( m_car == nullptr && m_cdr == nullptr )
+        {
+            stream << ")";
+            return;
+        }
+        
         if ( m_car == nullptr )
         {
             stream << "nil";
@@ -265,7 +271,10 @@ public:
     }
 
     virtual int64_t intValue() = 0;
-    virtual int64_t doubleValue() = 0;
+    virtual double doubleValue() = 0;
+
+    virtual void setIntValue( int64_t ) = 0;
+    virtual void setDoubleValue( double ) = 0;
 };
 
 
@@ -290,7 +299,10 @@ public:
     }
 
     virtual int64_t intValue() override { return m_intValue; }
-    virtual int64_t doubleValue() override { return m_intValue; }
+    virtual double doubleValue() override { return m_intValue; }
+    
+    virtual void setIntValue( int64_t value ) { m_intValue = value; }
+    virtual void setDoubleValue( double value );
 };
 
 //------------------------
@@ -316,8 +328,14 @@ public:
     }
 
     virtual int64_t intValue() override { return m_doubleValue; }
-    virtual int64_t doubleValue() override { return m_doubleValue; }
+    virtual double doubleValue() override { return m_doubleValue; }
+    
+    virtual void setIntValue( int64_t value ) { new(this) IntNumber(value); }
+    virtual void setDoubleValue( double value ) { m_doubleValue = value; }
 };
+
+inline void IntNumber::setDoubleValue( double value ) { new(this) Double(value); }
+
 
 //------------------------
 // Custom

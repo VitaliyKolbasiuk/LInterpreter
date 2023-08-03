@@ -1,13 +1,51 @@
 #include "mainwindow.h"
 #include "gInterpreter.h"
+#include <QMouseEvent>
 
-//(( gSetWindowSize 800 800 ) ( set dx 2 ) ( set dy 2 ) (set x 10) (set y 100)\
-//                        ( defun paintEvent (painter) )\
-//                             ( painter setRenderHintAntialiasing true )\
-//                             ( set radius 10 )\
-//                            ( if ( OR (> (+ x dx) (- (painter with) radius) (< (+ x dx) 0))\
-//                                    (set dx (- 0 dx)) )\
-//                             ( painter setBrush \"black\" ))
+
+void MainWidget::mouseMoveEvent( QMouseEvent* qEvent )
+{
+    if ( gInterpreter::getInstance().m_mouseMoveEventAtom->value()->type() != ISExpr::LIST )
+    {
+        LOG_ERR( "Undefined function 'mouseMoveEvent'" );
+        return;
+    }
+    
+    auto qX = qEvent->pos().x();
+    auto qY = qEvent->pos().y();
+
+    IntNumber x(qX);
+    IntNumber y(qY);
+    List yList(&y);
+    List arguments( &x, &yList );
+    arguments.print("\narguments: ");
+    List funcCall( gInterpreter::getInstance().m_mouseMoveEventAtom, nullptr );
+    gInterpreter::getInstance().eval( &funcCall );
+}
+
+void MainWidget::mousePressEvent( QMouseEvent* qEvent )
+{
+    if ( gInterpreter::getInstance().m_mousePressEventAtom->value()->type() != ISExpr::LIST )
+    {
+        LOG_ERR( "Undefined function 'mousePressEvent'" );
+        return;
+    }
+    
+    List funcCall( gInterpreter::getInstance().m_mousePressEventAtom, nullptr );
+    gInterpreter::getInstance().eval( &funcCall );
+}
+
+void MainWidget::mouseReleaseEvent( QMouseEvent* qEvent )
+{
+    if ( gInterpreter::getInstance().m_mouseReleaseEventAtom->value()->type() != ISExpr::LIST )
+    {
+        LOG_ERR( "Undefined function 'mouseReleaseEvent'" );
+        return;
+    }
+    
+    List funcCall( gInterpreter::getInstance().m_mouseReleaseEventAtom, nullptr );
+    gInterpreter::getInstance().eval( &funcCall );
+}
 
 void MainWidget::paintEvent(QPaintEvent* event)
 {
@@ -15,22 +53,24 @@ void MainWidget::paintEvent(QPaintEvent* event)
     QPainter qPainter(this);
     Custom<QPainter> painter( &qPainter );
 
-    // Get 'paintEvent' function definition
-    auto* paintEventAtom = gInterpreter::getInstance().getAtom( "paintEvent" );
-    if ( paintEventAtom == nullptr )
+    if ( gInterpreter::getInstance().m_paintEventAtom->value()->type() != ISExpr::LIST )
     {
         LOG_ERR( "Undefined function 'paintEvent'" );
         return;
     }
     
-    // !!! evaluate: '(paintEvent painter)'
     List argument(&painter);
-    List funcCall( paintEventAtom, &argument );
+    List funcCall( gInterpreter::getInstance().m_paintEventAtom, &argument );
     gInterpreter::getInstance().eval( &funcCall );
 }
 
 gInterpreter::gInterpreter()
 {
+    m_paintEventAtom        = getAtom( "paintEvent" );
+    m_mousePressEventAtom   = getAtom( "mousePressEvent" );
+    m_mouseMoveEventAtom    = getAtom( "mouseMoveEvent" );
+    m_mouseReleaseEventAtom = getAtom( "mouseReleaseEvent" );
+
     m_builtInFuncMap["gSetWindowSize"] = new BuiltinFunc( "gSetWindowSize", [](List* expr) -> ISExpr*
     {
         auto* width = gInterpreter::getInstance().eval( expr->m_car );
@@ -65,6 +105,8 @@ gInterpreter::gInterpreter()
         auto* qPainter = painter->value();
         expr = expr->m_cdr;
         
+        expr->m_car->print0("\n");
+        gInterpreter::getInstance().eval( expr->m_car )->print0("\n");
         int x = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 

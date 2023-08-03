@@ -147,7 +147,7 @@ public:
                 }
                 case Scanner::RIGHT_BRACKET:
                 {
-                    //result->print("\n--RB-- parser result: ");
+                    result->print("\n--RB-- parser result: ");
                     return result;
                 }
                 case Scanner::ATOM:
