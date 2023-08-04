@@ -1,14 +1,15 @@
 #include "LInterpreter.h"
 #include <cassert>
-/*
- (rect (position 100 20) (size 20 30) (color 0xFFCC00) (fillcolor 0xFFFFFF) (text "Some textz"))
- (rect (position 100 20) (size 20 30) (color 0xFFCC00))
- */
 
-// (defun test (p1 p2) (print (+ p1 p2)) )
-LInterpreter::LInterpreter() {
+LInterpreter* LInterpreter::gLInterpreterInstance = nullptr;
 
-    m_globalVariableMap["nil"] = m_nilAtom->toAtom();
+LInterpreter::LInterpreter()
+{
+    assert( gLInterpreterInstance == nullptr );
+    gLInterpreterInstance = this;
+
+    m_nilAtom = new Atom("nil");
+    m_globalVariableMap["nil"] = m_nilAtom;
 
     m_parser.init( m_globalVariableMap, m_builtInFuncMap );
 
@@ -27,30 +28,18 @@ LInterpreter::LInterpreter() {
 	});
     
 
-    //--------------------------------------------------------------------------------
-    // (parse "(print (cons (a b c) (1 2 3)))") -> (print (cons (a b c) (1 2 3)))
-    //--------------------------------------------------------------------------------
-//    m_builtInFuncMap["parse"] = [](List* expr) -> ISExpr* {
-//        auto* result = LInterpreter::getInstance().m_parser.parse( expr->m_car->m_atomName, LInterpreter::getInstance().m_globalVariableMap );
-//        return result;
-//    };
-
-
-
-    //--------------------------------------------------------------------------------
-    // (eval expr) ->
-    //--------------------------------------------------------------------------------
+    // quote
     m_builtInFuncMap["quote"] = new BuiltinFunc( "quote", [](List* expr) -> ISExpr* {
         return expr->m_car;
     });
 
     // (print (+ a b) (+ d c) )
     m_builtInFuncMap["print"] = new BuiltinFunc( "print", [](List* expr) -> ISExpr* {
-        ISExpr* result = LInterpreter::getInstance().m_nilAtom;
+        ISExpr* result = LInterpreter::instance().m_nilAtom;
         //expr->print("\ndbg: ");
 
         for( auto* it = expr; it != nullptr; it = it->m_cdr ) {
-            result = LInterpreter::getInstance().eval(it->m_car);
+            result = LInterpreter::instance().eval(it->m_car);
             if ( result != nullptr )
             {
                 result->print( std::cout );
@@ -71,7 +60,7 @@ LInterpreter::LInterpreter() {
     m_builtInFuncMap["car"] = new BuiltinFunc( "car", [](List* expr) -> ISExpr* {
         if ( expr == nullptr )
         {
-            return LInterpreter::getInstance().m_nilAtom;
+            return LInterpreter::instance().m_nilAtom;
         }
         return expr->m_car;
     });
@@ -79,7 +68,7 @@ LInterpreter::LInterpreter() {
     m_builtInFuncMap["cdr"] = new BuiltinFunc( "cdr", [](List* expr) -> ISExpr* {
         if ( expr == nullptr )
         {
-            return LInterpreter::getInstance().m_nilAtom;
+            return LInterpreter::instance().m_nilAtom;
         }
         return expr->m_cdr;
     });
@@ -87,7 +76,7 @@ LInterpreter::LInterpreter() {
     m_builtInFuncMap["cons"] = new BuiltinFunc( "cons", [](List* expr) -> ISExpr* {
         if ( expr == nullptr )
         {
-            return LInterpreter::getInstance().m_nilAtom;
+            return LInterpreter::instance().m_nilAtom;
         }
         expr->print("dbg:cons:");
         std::cout << std::endl;
@@ -110,19 +99,24 @@ LInterpreter::LInterpreter() {
     {
         if ( expr == nullptr )
         {
-            return LInterpreter::getInstance().m_nilAtom;
+            return LInterpreter::instance().m_nilAtom;
         }
-        auto* var= expr->m_car->toAtom();
-        auto* value = (expr->m_cdr==nullptr) ? LInterpreter::getInstance().m_nilAtom
-                                             : LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+        auto* var   = expr->m_car->toAtom();
+        auto* value = (expr->m_cdr==nullptr) ? LInterpreter::instance().m_nilAtom
+                                             : LInterpreter::instance().eval( expr->m_cdr->m_car );
+//        var->print0("\nvar: ");
+//        if ( var == LInterpreter::instance().getAtom("1playerX") )
+//        {
+//            value->print0("\nvalue: ");
+//        }
         var->setValue( value );
         return value;
     });
 
     m_builtInFuncMap["-"] = new BuiltinFunc( "-", [](List* expr) -> ISExpr*
     {
-        auto* value1 = LInterpreter::getInstance().eval( expr->m_car );
-        auto* value2 = LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+        auto* value1 = LInterpreter::instance().eval( expr->m_car );
+        auto* value2 = LInterpreter::instance().eval( expr->m_cdr->m_car );
         
         if ( value1->type()==ISExpr::INT_NUMBER && value2->type()==ISExpr::INT_NUMBER )
         {
@@ -134,8 +128,8 @@ LInterpreter::LInterpreter() {
 
     m_builtInFuncMap["/"] = new BuiltinFunc( "/", [](List* expr) -> ISExpr*
     {
-        auto* value1 = LInterpreter::getInstance().eval( expr->m_car );
-        auto* value2 = LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+        auto* value1 = LInterpreter::instance().eval( expr->m_car );
+        auto* value2 = LInterpreter::instance().eval( expr->m_cdr->m_car );
 
         if ( value2->toNumberBase()->doubleValue() == 0 )
         {
@@ -146,8 +140,8 @@ LInterpreter::LInterpreter() {
 
     m_builtInFuncMap["*"] = new BuiltinFunc( "*", [](List* expr) -> ISExpr*
     {
-        auto* value1 = LInterpreter::getInstance().eval( expr->m_car );
-        auto* value2 = LInterpreter::getInstance().eval( expr->m_cdr->m_car );
+        auto* value1 = LInterpreter::instance().eval( expr->m_car );
+        auto* value2 = LInterpreter::instance().eval( expr->m_cdr->m_car );
 
         return new Double( value1->toNumberBase()->doubleValue() * value2->toNumberBase()->doubleValue() );
     });
@@ -155,43 +149,49 @@ LInterpreter::LInterpreter() {
     // OR
     m_builtInFuncMap["OR"] = new BuiltinFunc( "OR", [](List* expr) -> ISExpr*
     {
-        auto* value = LInterpreter::getInstance().eval( expr->m_car );
-        auto* secondValue = LInterpreter::getInstance().eval( expr->m_cdr->m_car );
-        bool first = LInterpreter::getInstance().isNil(value);
-        bool second = LInterpreter::getInstance().isNil(secondValue);
-        return !first || !second ?  expr : LInterpreter::getInstance().m_nilAtom;
+        auto* value = LInterpreter::instance().eval( expr->m_car );
+        auto* secondValue = LInterpreter::instance().eval( expr->m_cdr->m_car );
+        bool first = LInterpreter::instance().isNil(value);
+        bool second = LInterpreter::instance().isNil(secondValue);
+        
+        if ( first || second )
+        {
+            return expr;
+        }
+        
+        return LInterpreter::instance().m_nilAtom;
     });
 
     // if
     m_builtInFuncMap["if"] = new BuiltinFunc( "if", [](List* expr) -> ISExpr*
     {
-        auto* x = LInterpreter::getInstance().eval(expr->m_car);
-        bool istrue = !LInterpreter::getInstance().isNil(x);
+        auto* x = LInterpreter::instance().eval(expr->m_car);
+        bool istrue = !LInterpreter::instance().isNil(x);
         if (istrue) {
-            LInterpreter::getInstance().eval(expr->m_cdr->m_car);
+            LInterpreter::instance().eval(expr->m_cdr->m_car);
         }
     });
 
     m_builtInFuncMap[">"] = new BuiltinFunc( ">", [](List* expr) -> ISExpr*
     {
-        auto value1 = LInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->doubleValue();
-        auto value2 = LInterpreter::getInstance().eval( expr->m_cdr->m_car )->toNumberBase()->doubleValue();
+        auto value1 = LInterpreter::instance().eval( expr->m_car )->toNumberBase()->doubleValue();
+        auto value2 = LInterpreter::instance().eval( expr->m_cdr->m_car )->toNumberBase()->doubleValue();
         if ( value1 > value2 )
         {
             return expr;
         }
-        return LInterpreter::getInstance().m_nilAtom;
+        return LInterpreter::instance().m_nilAtom;
     });
 
     m_builtInFuncMap["<"] = new BuiltinFunc( "<", [](List* expr) -> ISExpr*
  {
-        auto value1 = LInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->doubleValue();
-        auto value2 = LInterpreter::getInstance().eval( expr->m_cdr->m_car )->toNumberBase()->doubleValue();
+        auto value1 = LInterpreter::instance().eval( expr->m_car )->toNumberBase()->doubleValue();
+        auto value2 = LInterpreter::instance().eval( expr->m_cdr->m_car )->toNumberBase()->doubleValue();
         if ( value1 < value2 )
         {
             return expr;
         }
-        return LInterpreter::getInstance().m_nilAtom;
+        return LInterpreter::instance().m_nilAtom;
  });
 
     m_builtInFuncMap["+"] = new BuiltinFunc( "+", [](List* expr) -> ISExpr*
@@ -200,7 +200,7 @@ LInterpreter::LInterpreter() {
         ISExpr::Type returnType = ISExpr::INT_NUMBER;
         for (auto* it = expr; it != nullptr; it = it->m_cdr)
         {
-            auto* value = LInterpreter::getInstance().eval( it->m_car );
+            auto* value = LInterpreter::instance().eval( it->m_car );
             if ( value->type() < returnType )
             {
                 returnType = value->type();
@@ -215,7 +215,7 @@ LInterpreter::LInterpreter() {
                 std::string returnValue;
                 for (auto* it = expr; it != nullptr; it = it->m_cdr)
                 {
-                    auto* value = LInterpreter::getInstance().eval( it->m_car );
+                    auto* value = LInterpreter::instance().eval( it->m_car );
                     if (value->type() == ISExpr::ATOM) {
                         returnValue += value->toAtom()->name();
                     }
@@ -240,7 +240,7 @@ LInterpreter::LInterpreter() {
                 for (auto* it = expr; it != nullptr; it = it->m_cdr)
                 {
                     //it->m_car->print("\nit->m_car: ");
-                    auto* value = LInterpreter::getInstance().eval( it->m_car );
+                    auto* value = LInterpreter::instance().eval( it->m_car );
                     //value->print("\nvalue: ");
                     assert( value->type() != ISExpr::ATOM );
                     if ( value->type() == ISExpr::DOUBLE ) {
@@ -261,7 +261,7 @@ LInterpreter::LInterpreter() {
                 for (auto* it = expr; it != nullptr; it = it->m_cdr)
                 {
                     //it->m_car->print("\nit->m_car: ");
-                    auto* value = LInterpreter::getInstance().eval( it->m_car );
+                    auto* value = LInterpreter::instance().eval( it->m_car );
                     //value->print("\nvalue: ");
                     assert( value->type() != ISExpr::ATOM );
                     assert( value->type() != ISExpr::DOUBLE );

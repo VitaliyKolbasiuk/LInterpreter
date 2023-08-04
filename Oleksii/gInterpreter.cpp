@@ -14,12 +14,12 @@ void MainWidget::mouseMoveEvent( QMouseEvent* qEvent )
     auto qX = qEvent->pos().x();
     auto qY = qEvent->pos().y();
 
-    IntNumber x(qX);
-    IntNumber y(qY);
-    List yList(&y);
-    List arguments( &x, &yList );
+    IntNumber* x = new IntNumber(qX);
+    IntNumber* y = new IntNumber(qY);
+    List yList(y);
+    List arguments( x, &yList );
     arguments.print("\narguments: ");
-    List funcCall( gInterpreter::getInstance().m_mouseMoveEventAtom, nullptr );
+    List funcCall( gInterpreter::getInstance().m_mouseMoveEventAtom, &arguments );
     gInterpreter::getInstance().eval( &funcCall );
 }
 
@@ -105,17 +105,19 @@ gInterpreter::gInterpreter()
         auto* qPainter = painter->value();
         expr = expr->m_cdr;
         
-        expr->m_car->print0("\n");
-        gInterpreter::getInstance().eval( expr->m_car )->print0("\n");
+        //  x
         int x = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
+        //  y
         int y = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
+        //  xRadius
         int xRadius = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 
+        //  yRadius
         int yRadius = gInterpreter::getInstance().eval( expr->m_car )->toNumberBase()->intValue();
         expr = expr->m_cdr;
 

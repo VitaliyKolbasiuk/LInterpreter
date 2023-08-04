@@ -11,8 +11,10 @@
 #include <sstream>
 
 class LInterpreter {
+    static LInterpreter* gLInterpreterInstance;
+    
 public:
-    ISExpr*  m_nilAtom = new Atom("nil");
+    Atom*  m_nilAtom = nullptr;
     
     bool isNil( ISExpr* at)
     {
@@ -29,6 +31,11 @@ protected:
     void addPseudoTableFuncs();
     
 public:
+    static LInterpreter& instance()
+    {
+        return *gLInterpreterInstance;
+    }
+    
     Atom* getAtom( const char* name )
     {
         return m_parser.getAtom(name)->toAtom();
@@ -38,11 +45,6 @@ public:
     BuiltinFuncMap m_builtInFuncMap;
     
     NameToSExprMap m_globalVariableMap;
-
-	static LInterpreter& getInstance() {
-		static LInterpreter instance;
-		return instance;
-	}
 
     ISExpr* evalFile( const std::string& fileName )
     {
@@ -133,7 +135,7 @@ public:
             parameters->print("\nparameters:");
         }
 
-        funcName->value()->print0("\nvalue:");
+        //funcName->value()->print0("\nvalue:");
         auto* funcDefinition = funcName->value()->toList();
         //funcDefinition->print("\nfuncDefinition:");
         
@@ -156,7 +158,7 @@ public:
         }
         else
         {
-            funcBody->print("\nfuncBody:");
+            //funcBody->print("\nfuncBody:");
         }
         
         //

@@ -36,25 +36,5 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-
-//    std::string code = "(set x 11) (print x)";
-
-//        std::string code = "(if ( OR ( > 5 10) (> 4 10) )  (print(+ 10 10)) )";
-//    auto& interpreter = gInterpreter::getInstance();
-//    return interpreter.exec(argc, argv, code);
-
-
-//    std::string code = "(print(- -7.5 5))";
-//    std::string code = "(print(OR ( < 5 10) (< 4 10) )            )";
-//std::string code = "(print(13123412412))";
-
-//std::string code = "(set x 11) (print x)";
-//LInterpreter& lInterpreter = LInterpreter::getInstance();
-//while( lInterpreter.eval(code) != nullptr ) {
-//}
-
-//    LInterpreter& lInterpreter = LInterpreter::getInstance();
-//    while( lInterpreter.eval(code) != nullptr ) {
-//    }
     return 0;
 }

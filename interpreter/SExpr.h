@@ -65,7 +65,7 @@ public:
     virtual ISExpr* print( std::ostream& stream ) const = 0;
     virtual ISExpr* eval() = 0;
 
-    virtual ISExpr* print0( const char* prefix ) const { std::cout << prefix; print(std::cout); return nullptr;};
+    virtual ISExpr* print0( const char* prefix ) const { std::cout << prefix; print(std::cout); std::cout << "\n"; return nullptr;};
 
     ISExpr* toExpr() { return this; }
     
@@ -168,7 +168,7 @@ public:
         
         if ( m_car == nullptr )
         {
-            stream << "nil";
+            stream << "nil(nullptr)";
         }
         else
         {
@@ -195,7 +195,12 @@ class Atom : public ISExpr
     ISExpr*     m_value = this;
 
 public:
-    Atom( const char* name ) : m_name( copyString(name) ), m_value(this) {};
+    Atom( const char* name ) : m_name( copyString(name) ), m_value(this) {
+        if ( strcmp(m_name,"nil") == 0 )
+        {
+            LOG("nil");
+        }
+    };
     Atom( const char* name, ISExpr* value ) : m_name( copyString(name) ), m_value(value) {};
     virtual ~Atom() { delete [] m_name; }
 
@@ -208,7 +213,6 @@ public:
         stream << m_name;
         return nullptr;
     }
-//    ISExpr*     retnil() const { return LInterpreter::getInstance().m_nilAtom;}
     const char* name() const { return m_name; }
     ISExpr*     value() const { return m_value; }
     void        setValue( ISExpr* newValue ) { m_value = newValue; }
