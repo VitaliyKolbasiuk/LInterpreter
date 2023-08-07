@@ -104,11 +104,6 @@ LInterpreter::LInterpreter()
         auto* var   = expr->m_car->toAtom();
         auto* value = (expr->m_cdr==nullptr) ? LInterpreter::instance().m_nilAtom
                                              : LInterpreter::instance().eval( expr->m_cdr->m_car );
-//        var->print0("\nvar: ");
-//        if ( var == LInterpreter::instance().getAtom("1playerX") )
-//        {
-//            value->print0("\nvalue: ");
-//        }
         var->setValue( value );
         return value;
     });
