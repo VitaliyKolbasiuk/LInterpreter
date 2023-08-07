@@ -83,6 +83,8 @@ protected:
 
         painter.setBrush(Qt::red);
         painter.drawEllipse(ellipsePos.x(), ellipsePos.y(), ellipseRadius*2, ellipseRadius*2 );
+
+
     }
 
     void mousePressEvent(QMouseEvent *event) override {

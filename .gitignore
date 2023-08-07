@@ -18,6 +18,7 @@ _build
 build-Oleksii-Desktop_Qt_6_5_1_MinGW_64_bit-Debug
 build-Vitaliy-Desktop_Qt_6_5_1_MinGW_64_bit-Debug
 build-VitaliyG-Desktop_Qt_6_5_1_MinGW_64_bit-Debug
+build-TestBoost-Desktop_Qt_6_5_1_MinGW_64_bit-Debug
 x64/Debug
 build 
 CMakeLists.txt.user
